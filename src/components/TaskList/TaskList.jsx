@@ -9,7 +9,7 @@ import {
 } from "./StyledTaskList.jsx";
 
 const TaskList = () => {
-  const { tasks } = useTasks();
+  const { tasks, isLoading } = useTasks();
   const [filter, setFilter] = useState("all");
 
   const filteredTasks = tasks.filter((task) => {
@@ -17,6 +17,16 @@ const TaskList = () => {
     if (filter === "completed") return task.completed;
     return true;
   });
+
+  // show loading state while tasks are being loaded from localStorage
+  if (isLoading) {
+    return (
+      <EmptyState>
+        <h3>Loading your tasks...</h3>
+        <p>Please wait a moment</p>
+      </EmptyState>
+    );
+  }
 
   if (tasks.length === 0) {
     return (
