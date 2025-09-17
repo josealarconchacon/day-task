@@ -18,12 +18,12 @@ const taskReducer = (state, action) => {
       return {
         ...state,
         tasks: [
-          ...state.tasks,
           {
             id: uuidv4(),
             text: action.payload,
             completed: false,
           },
+          ...state.tasks,
         ],
       };
     case "delete_task":
