@@ -1,9 +1,19 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TaskContext } from "./TaskContext.js";
+import {
+  getFromStorage,
+  saveToStorage,
+  isStorageAvailable,
+} from "../utils/localStorage.js";
 
 const taskReducer = (state, action) => {
   switch (action.type) {
+    case "load_tasks":
+      return {
+        ...state,
+        tasks: action.payload,
+      };
     case "add_task":
       return {
         ...state,
@@ -48,9 +58,45 @@ const initialState = {
   tasks: [],
 };
 
-// add, delete, toggle, and edit operations.
+// localStorage integration
 export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const isInitialized = useRef(false);
+
+  // load tasks from localStorage on mount
+  useEffect(() => {
+    const loadInitialTasks = async () => {
+      try {
+        if (isStorageAvailable()) {
+          const savedTasks = getFromStorage("dayTask_tasks", []);
+          if (savedTasks.length > 0) {
+            dispatch({ type: "load_tasks", payload: savedTasks });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading tasks from localStorage:", error);
+      } finally {
+        setIsLoading(false);
+        isInitialized.current = true;
+      }
+    };
+
+    loadInitialTasks();
+  }, []);
+
+  // save tasks to localStorage
+  useEffect(() => {
+    if (isInitialized.current && !isLoading) {
+      try {
+        if (isStorageAvailable()) {
+          saveToStorage("dayTask_tasks", state.tasks);
+        }
+      } catch (error) {
+        console.error("Error saving tasks to localStorage:", error);
+      }
+    }
+  }, [state.tasks, isLoading]);
 
   const addTask = (text) => {
     dispatch({ type: "add_task", payload: text });
@@ -76,6 +122,7 @@ export const TaskProvider = ({ children }) => {
         deleteTask,
         toggleTask,
         editTask,
+        isLoading,
       }}
     >
       {children}
