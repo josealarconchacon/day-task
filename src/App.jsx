@@ -1,5 +1,5 @@
 import React from "react";
-import { TaskProvider } from "./context/TaskContext";
+import { TaskProvider } from "./context/TaskContext.jsx";
 import TaskList from "./components/TaskList/TaskList";
 import TaskForm from "./components/TaskForm/TaskForm";
 import {
@@ -18,6 +18,8 @@ const App = () => {
           <Title>Day Task</Title>
           <p>Manage your daily task</p>
         </Header>
+        <TaskForm />
+        <TaskList />
       </AppContainer>
     </TaskProvider>
   );
