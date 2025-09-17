@@ -40,3 +40,10 @@ export const Title = styled.h1`
   font-size: 2.5rem;
   margin-bottom: 10px;
 `;
+
+export const MainContent = styled.div`
+  opacity: ${(props) => (props.$isVisible ? 1 : 0)};
+  transform: ${(props) =>
+    props.$isVisible ? "translateY(0)" : "translateY(20px)"};
+  transition: opacity 0.5s ease, transform 0.5s ease;
+`;
