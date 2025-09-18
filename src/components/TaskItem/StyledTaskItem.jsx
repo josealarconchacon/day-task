@@ -209,6 +209,6 @@ export const EditInput = styled.input`
 
   @media (max-width: 768px) {
     padding: 10px 14px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px; 
   }
 `;

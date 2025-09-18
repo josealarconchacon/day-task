@@ -1,234 +1,182 @@
-import React, { useState } from "react";
-import Button from "../Button/Button.jsx";
+import React, { useState, useCallback } from "react";
 import Modal from "../Modal/Modal.jsx";
-import Priority, { PrioritySelector } from "../Priority/index.jsx";
-import { Category, CategorySelector } from "../Category/index.jsx";
-import TaskNotes from "../TaskNotes/TaskNotes.jsx";
+import Button from "../Button/Button.jsx";
+import TaskDisplay from "./TaskDisplay.jsx";
+import TaskEditor from "./TaskEditor.jsx";
+import TaskActions from "./TaskActions.jsx";
+import TaskNotesSection from "./TaskNotesSection.jsx";
 import { useTasks } from "../../hooks/useTasks";
+import { DEFAULT_VALUES } from "../../constants/index.js";
 import {
   TaskContainer,
   TaskHeader,
   Checkbox,
-  TaskText,
-  TaskActions,
-  EditInput,
-  TaskContent,
-  EditSection,
-  EditInputRow,
   TaskDetails,
-  TaskMainContent,
-  TaskMeta,
-  EditNotesSection,
 } from "./StyledTaskItem.jsx";
 
 const TaskItem = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
-  const [editPriority, setEditPriority] = useState(task.priority || "medium");
-  const [editCategory, setEditCategory] = useState(task.category || "personal");
-  const [editNotes, setEditNotes] = useState(task.notes || "");
+  const [editPriority, setEditPriority] = useState(
+    task.priority || DEFAULT_VALUES.PRIORITY
+  );
+  const [editCategory, setEditCategory] = useState(
+    task.category || DEFAULT_VALUES.CATEGORY
+  );
+  const [editNotes, setEditNotes] = useState(
+    task.notes || DEFAULT_VALUES.NOTES
+  );
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     if (editText.trim()) {
       editTask(task.id, editText, editPriority, editCategory, editNotes);
       setIsEditing(false);
     }
-  };
+  }, [task.id, editText, editPriority, editCategory, editNotes, editTask]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditText(task.text);
-    setEditPriority(task.priority || "medium");
-    setEditCategory(task.category || "personal");
-    setEditNotes(task.notes || "");
+    setEditPriority(task.priority || DEFAULT_VALUES.PRIORITY);
+    setEditCategory(task.category || DEFAULT_VALUES.CATEGORY);
+    setEditNotes(task.notes || DEFAULT_VALUES.NOTES);
     setIsEditing(false);
-  };
+  }, [task.text, task.priority, task.category, task.notes]);
 
-  const handleNotesEdit = () => {
+  const handleNotesEdit = useCallback(() => {
     if (editNotes.trim() !== (task.notes || "").trim()) {
       editTask(
         task.id,
         task.text,
-        task.priority || "medium",
-        task.category || "personal",
+        task.priority || DEFAULT_VALUES.PRIORITY,
+        task.category || DEFAULT_VALUES.CATEGORY,
         editNotes
       );
     }
     setIsEditingNotes(false);
-  };
+  }, [
+    task.id,
+    task.text,
+    task.priority,
+    task.category,
+    task.notes,
+    editNotes,
+    editTask,
+  ]);
 
-  const handleCancelNotesEdit = () => {
-    setEditNotes(task.notes || "");
+  const handleCancelNotesEdit = useCallback(() => {
+    setEditNotes(task.notes || DEFAULT_VALUES.NOTES);
     setIsEditingNotes(false);
-  };
+  }, [task.notes]);
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleEdit();
-    else if (e.key === "Escape") handleCancelEdit();
-  };
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter") handleEdit();
+      else if (e.key === "Escape") handleCancelEdit();
+    },
+    [handleEdit, handleCancelEdit]
+  );
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteTask(task.id);
     setShowDeleteModal(false);
-  };
+  }, [task.id, deleteTask]);
+
+  const handleToggleTask = useCallback(() => {
+    toggleTask(task.id);
+  }, [task.id, toggleTask]);
+
+  const handleStartEdit = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const handleStartEditingNotes = useCallback(() => {
+    setIsEditingNotes(true);
+  }, []);
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setShowDeleteModal(false);
+  }, []);
+
+
+  const handleTextChange = useCallback((e) => {
+    setEditText(e.target.value);
+  }, []);
+
+  const handlePriorityChange = useCallback((e) => {
+    setEditPriority(e.target.value);
+  }, []);
+
+  const handleCategoryChange = useCallback((e) => {
+    setEditCategory(e.target.value);
+  }, []);
+
+  const handleNotesChange = useCallback((newNotes) => {
+    setEditNotes(newNotes);
+  }, []);
 
   return (
     <>
-      <TaskContainer $priority={task.priority || "medium"}>
+      <TaskContainer $priority={task.priority || DEFAULT_VALUES.PRIORITY}>
         <TaskHeader>
           <Checkbox
             type="checkbox"
             checked={task.completed}
-            onChange={() => toggleTask(task.id)}
+            onChange={handleToggleTask}
           />
 
           <TaskDetails>
             {isEditing ? (
-              <EditSection>
-                <EditInputRow>
-                  <EditInput
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder="Task text..."
-                    autoFocus
-                  />
-                </EditInputRow>
-                <EditInputRow>
-                  <PrioritySelector
-                    value={editPriority}
-                    onChange={(e) => setEditPriority(e.target.value)}
-                  />
-                  <CategorySelector
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                  />
-                </EditInputRow>
-              </EditSection>
+              <TaskEditor
+                editText={editText}
+                editPriority={editPriority}
+                editCategory={editCategory}
+                onTextChange={handleTextChange}
+                onPriorityChange={handlePriorityChange}
+                onCategoryChange={handleCategoryChange}
+                onKeyDown={handleKeyPress}
+              />
             ) : (
-              <TaskContent>
-                <TaskMeta>
-                  <TaskText $completed={task.completed}>{task.text}</TaskText>
-                  <Category
-                    category={task.category || "personal"}
-                    size="small"
-                    variant="default"
-                  />
-                  <Priority
-                    priority={task.priority || "medium"}
-                    size="small"
-                    variant="dot"
-                  />
-                </TaskMeta>
-              </TaskContent>
+              <TaskDisplay task={task} />
             )}
           </TaskDetails>
         </TaskHeader>
 
-        {/* Notes Section */}
-        <EditNotesSection>
-          {/* Show notes preview if they exist */}
-          {task.notes && task.notes.trim() && !isEditing && !isEditingNotes && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#666",
-                marginBottom: "4px",
-                padding: "4px 8px",
-                backgroundColor: "#f8f9fa",
-                borderRadius: "4px",
-                borderLeft: "3px solid #6c5ce7",
-              }}
-            >
-              <strong>Notes:</strong>{" "}
-              {task.notes.length > 50
-                ? task.notes.substring(0, 50) + "..."
-                : task.notes}
-            </div>
-          )}
-
-          <TaskNotes
-            notes={isEditing || isEditingNotes ? editNotes : task.notes || ""}
-            onNotesChange={setEditNotes}
-            isEditing={isEditing || isEditingNotes}
-            placeholder="Add notes for this task..."
-            variant="compact"
-          />
-          {!isEditing && !isEditingNotes && (
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setIsEditingNotes(true)}
-              style={{ marginTop: "4px" }}
-            >
-              {task.notes && task.notes.trim() ? "Edit Notes" : "Add Notes"}
-            </Button>
-          )}
-          {isEditingNotes && (
-            <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-              <Button variant="primary" size="small" onClick={handleNotesEdit}>
-                Save Notes
-              </Button>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={handleCancelNotesEdit}
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-        </EditNotesSection>
+        <TaskNotesSection
+          task={task}
+          editNotes={editNotes}
+          isEditing={isEditing}
+          isEditingNotes={isEditingNotes}
+          onNotesChange={handleNotesChange}
+          onStartEditingNotes={handleStartEditingNotes}
+          onSaveNotes={handleNotesEdit}
+          onCancelNotesEdit={handleCancelNotesEdit}
+        />
 
         {}
-        <TaskActions>
-          {isEditing ? (
-            <>
-              <Button variant="primary" size="small" onClick={handleEdit}>
-                Save
-              </Button>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => setIsEditing(true)}
-                disabled={task.completed}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="danger"
-                size="small"
-                onClick={() => setShowDeleteModal(true)}
-              >
-                Delete
-              </Button>
-            </>
-          )}
-        </TaskActions>
+        <TaskActions
+          isEditing={isEditing}
+          isCompleted={task.completed}
+          onEdit={handleStartEdit}
+          onSave={handleEdit}
+          onCancel={handleCancelEdit}
+          onDelete={handleShowDeleteModal}
+        />
       </TaskContainer>
 
       <Modal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={handleCloseDeleteModal}
         title="Confirm Delete"
         actions={
           <>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteModal(false)}
-            >
+            <Button variant="secondary" onClick={handleCloseDeleteModal}>
               Cancel
             </Button>
             <Button variant="danger" onClick={handleDelete}>

@@ -12,7 +12,6 @@ A simple daily task management application built with React. The application str
 - **Notes Support**: Add detailed notes to tasks
 - Tasks saved automatically to browser storage
 - Responsive design for mobile and desktop
-- Minimalist UI design following Apple/Google design principles
 
 ## Getting Started
 
