@@ -1,4 +1,6 @@
-const STORAGE_KEY = "dayTask_tasks";
+import { STORAGE_KEYS } from "../constants/index.js";
+
+const STORAGE_KEY = STORAGE_KEYS.TASKS;
 
 // get data from localStorage
 export const getFromStorage = (key = STORAGE_KEY, defaultValue = []) => {

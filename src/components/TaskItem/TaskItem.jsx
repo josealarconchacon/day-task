@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import Modal from "../Modal/Modal.jsx";
 import Priority, { PrioritySelector } from "../Priority/index.jsx";
-import Category, { CategorySelector } from "../Category/index.jsx";
+import { Category, CategorySelector } from "../Category/index.jsx";
 import TaskNotes from "../TaskNotes/TaskNotes.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import {
@@ -182,7 +182,7 @@ const TaskItem = ({ task }) => {
           )}
         </EditNotesSection>
 
-        {/* Actions */}
+        {}
         <TaskActions>
           {isEditing ? (
             <>

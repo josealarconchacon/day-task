@@ -8,7 +8,6 @@ import { PRIORITY_CONFIG } from "../../utils/priorityUtils.js";
 const PrioritySelector = ({
   value,
   onChange,
-  placeholder = "Priority",
   disabled = false,
   required = false,
   ...props

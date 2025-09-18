@@ -3,6 +3,8 @@ import { TaskProvider } from "./context/TaskContext.jsx";
 import TaskList from "./components/TaskList/TaskList";
 import TaskForm from "./components/TaskForm/TaskForm";
 import WelcomeScreen from "./components/WelcomeScreen/WelcomeScreen";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.jsx";
+import { TIMEOUTS } from "./constants/index.js";
 import {
   GlobalStyle,
   AppContainer,
@@ -15,11 +17,11 @@ const App = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [showMainApp, setShowMainApp] = useState(false);
 
-  // show welcome screen for 3 seconds, then automatically proceed
+  // show welcome screen for specified duration, then automatically proceed
   useEffect(() => {
     const timer = setTimeout(() => {
       handleGetStarted();
-    }, 3000);
+    }, TIMEOUTS.WELCOME_SCREEN_DURATION);
 
     return () => clearTimeout(timer);
   }, []);
@@ -28,7 +30,7 @@ const App = () => {
     setShowWelcome(false);
     setTimeout(() => {
       setShowMainApp(true);
-    }, 100);
+    }, TIMEOUTS.TRANSITION_DELAY);
   };
 
   if (showWelcome) {
@@ -41,19 +43,25 @@ const App = () => {
   }
 
   return (
-    <TaskProvider>
-      <GlobalStyle />
-      <AppContainer>
-        <MainContent $isVisible={showMainApp}>
-          <Header>
-            <Title>Day Task</Title>
-            <p>Manage your daily task</p>
-          </Header>
-          <TaskForm />
-          <TaskList />
-        </MainContent>
-      </AppContainer>
-    </TaskProvider>
+    <ErrorBoundary>
+      <TaskProvider>
+        <GlobalStyle />
+        <AppContainer>
+          <MainContent $isVisible={showMainApp}>
+            <Header>
+              <Title>Day Task</Title>
+              <p>Manage your daily task</p>
+            </Header>
+            <ErrorBoundary>
+              <TaskForm />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <TaskList />
+            </ErrorBoundary>
+          </MainContent>
+        </AppContainer>
+      </TaskProvider>
+    </ErrorBoundary>
   );
 };
 

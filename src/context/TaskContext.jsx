@@ -6,6 +6,12 @@ import {
   saveToStorage,
   isStorageAvailable,
 } from "../utils/localStorage.js";
+import {
+  TIMEOUTS,
+  STORAGE_KEYS,
+  DEFAULT_VALUES,
+  ERROR_MESSAGES,
+} from "../constants/index.js";
 
 // task validation helper
 const validateTask = (task) => {
@@ -15,10 +21,12 @@ const validateTask = (task) => {
   const validCategories = [
     "personal",
     "work",
+    "shopping",
     "health",
-    "finance",
     "education",
-    "social",
+    "finance",
+    "home",
+    "travel",
   ];
 
   return (
@@ -55,10 +63,10 @@ const taskReducer = (state, action) => {
       const newTask = {
         id: uuidv4(),
         text: action.payload.text?.trim() || "",
-        priority: action.payload.priority || "medium",
-        category: action.payload.category || "personal",
+        priority: action.payload.priority || DEFAULT_VALUES.PRIORITY,
+        category: action.payload.category || DEFAULT_VALUES.CATEGORY,
         completed: false,
-        notes: action.payload.notes || "",
+        notes: action.payload.notes || DEFAULT_VALUES.NOTES,
         createdAt: new Date().toISOString(),
       };
 
@@ -135,18 +143,18 @@ export const TaskProvider = ({ children }) => {
     saveTimeoutRef.current = setTimeout(() => {
       try {
         if (isStorageAvailable()) {
-          const success = saveToStorage("dayTask_tasks", tasks);
+          const success = saveToStorage(STORAGE_KEYS.TASKS, tasks);
           if (success) {
             setSaveError(null);
           } else {
-            setSaveError("Failed to save tasks. Changes may be lost.");
+            setSaveError(ERROR_MESSAGES.SAVE_FAILED);
           }
         }
       } catch (error) {
         console.error("Error saving tasks to localStorage:", error);
-        setSaveError("Failed to save tasks. Please check your storage space.");
+        setSaveError(ERROR_MESSAGES.QUOTA_EXCEEDED);
       }
-    }, 500);
+    }, TIMEOUTS.SAVE_DEBOUNCE_DELAY);
   }, []);
 
   // load tasks from localStorage on mount
@@ -154,7 +162,7 @@ export const TaskProvider = ({ children }) => {
     const loadInitialTasks = async () => {
       try {
         if (isStorageAvailable()) {
-          const savedTasks = getFromStorage("dayTask_tasks", []);
+          const savedTasks = getFromStorage(STORAGE_KEYS.TASKS, []);
           dispatch({ type: "load_tasks", payload: savedTasks });
         } else {
           console.warn(
@@ -187,9 +195,9 @@ export const TaskProvider = ({ children }) => {
 
   const addTask = (
     text,
-    priority = "medium",
-    category = "personal",
-    notes = ""
+    priority = DEFAULT_VALUES.PRIORITY,
+    category = DEFAULT_VALUES.CATEGORY,
+    notes = DEFAULT_VALUES.NOTES
   ) => {
     dispatch({
       type: "add_task",

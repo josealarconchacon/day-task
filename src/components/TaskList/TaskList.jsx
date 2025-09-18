@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useTasks } from "../../hooks/useTasks";
 import TaskItem from "../TaskItem/TaskItem.jsx";
 import Priority from "../Priority/Priority.jsx";
-import Category from "../Category/Category.jsx";
+import { Category } from "../Category/index.jsx";
 import { sortTasksByPriority } from "../../utils/priorityUtils.js";
 import { getCategoryOptions } from "../../utils/categoryUtils.js";
+import { TASK_FILTERS } from "../../constants/index.js";
 import {
   List,
   EmptyState,
@@ -16,37 +17,77 @@ import {
 
 const TaskList = () => {
   const { tasks, isLoading, saveError } = useTasks();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(TASK_FILTERS.ALL);
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortByPriority, setSortByPriority] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  let filteredTasks = tasks.filter((task) => {
-    // filter by completion status
-    if (filter === "active") return !task.completed;
-    if (filter === "completed") return task.completed;
-    return true;
-  });
+  // Memoize filtered and sorted tasks to prevent unnecessary recalculations
+  const filteredTasks = useMemo(() => {
+    let filtered = tasks.filter((task) => {
+      // filter by completion status
+      if (filter === TASK_FILTERS.ACTIVE) return !task.completed;
+      if (filter === TASK_FILTERS.COMPLETED) return task.completed;
+      return true;
+    });
 
-  // filter by priority if selected
-  if (priorityFilter !== "all") {
-    filteredTasks = filteredTasks.filter(
-      (task) => (task.priority || "medium") === priorityFilter
-    );
-  }
+    // filter by priority if selected
+    if (priorityFilter !== "all") {
+      filtered = filtered.filter(
+        (task) => (task.priority || "medium") === priorityFilter
+      );
+    }
 
-  // filter by category if selected
-  if (categoryFilter !== "all") {
-    filteredTasks = filteredTasks.filter(
-      (task) => (task.category || "personal") === categoryFilter
-    );
-  }
+    // filter by category if selected
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(
+        (task) => (task.category || "personal") === categoryFilter
+      );
+    }
 
-  // sort by priority if enabled
-  if (sortByPriority) {
-    filteredTasks = sortTasksByPriority(filteredTasks);
-  }
+    // sort by priority if enabled
+    if (sortByPriority) {
+      return sortTasksByPriority(filtered);
+    }
+
+    return filtered;
+  }, [tasks, filter, priorityFilter, categoryFilter, sortByPriority]);
+
+  const taskCounts = useMemo(
+    () => ({
+      all: tasks.length,
+      active: tasks.filter((t) => !t.completed).length,
+      completed: tasks.filter((t) => t.completed).length,
+      high: tasks.filter((t) => (t.priority || "medium") === "high").length,
+      medium: tasks.filter((t) => (t.priority || "medium") === "medium").length,
+      low: tasks.filter((t) => (t.priority || "medium") === "low").length,
+    }),
+    [tasks]
+  );
+
+  const categoryOptions = useMemo(() => getCategoryOptions(), []);
+
+  // filter handlers to prevent unnecessary re-renders
+  const handleFilterChange = useCallback((newFilter) => {
+    setFilter(newFilter);
+  }, []);
+
+  const handlePriorityFilterChange = useCallback((newPriorityFilter) => {
+    setPriorityFilter(newPriorityFilter);
+  }, []);
+
+  const handleCategoryFilterChange = useCallback((newCategoryFilter) => {
+    setCategoryFilter(newCategoryFilter);
+  }, []);
+
+  const handleSortToggle = useCallback((checked) => {
+    setSortByPriority(checked);
+  }, []);
+
+  const handleAdvancedFiltersToggle = useCallback(() => {
+    setShowAdvancedFilters((prev) => !prev);
+  }, []);
 
   // show loading state while tasks are being loaded from localStorage
   if (isLoading) {
@@ -69,7 +110,7 @@ const TaskList = () => {
 
   return (
     <div>
-      {/* Save Error Notification */}
+      {}
       {saveError && (
         <div
           style={{
@@ -88,28 +129,28 @@ const TaskList = () => {
       {}
       <FilterContainer>
         <FilterButton
-          $active={filter === "all"}
-          onClick={() => setFilter("all")}
+          $active={filter === TASK_FILTERS.ALL}
+          onClick={() => handleFilterChange(TASK_FILTERS.ALL)}
         >
-          All ({tasks.length})
+          All ({taskCounts.all})
         </FilterButton>
         <FilterButton
-          $active={filter === "active"}
-          onClick={() => setFilter("active")}
+          $active={filter === TASK_FILTERS.ACTIVE}
+          onClick={() => handleFilterChange(TASK_FILTERS.ACTIVE)}
         >
-          Active ({tasks.filter((t) => !t.completed).length})
+          Active ({taskCounts.active})
         </FilterButton>
         <FilterButton
-          $active={filter === "completed"}
-          onClick={() => setFilter("completed")}
+          $active={filter === TASK_FILTERS.COMPLETED}
+          onClick={() => handleFilterChange(TASK_FILTERS.COMPLETED)}
         >
-          Completed ({tasks.filter((t) => t.completed).length})
+          Completed ({taskCounts.completed})
         </FilterButton>
 
         {}
         <FilterButton
           $active={showAdvancedFilters}
-          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          onClick={handleAdvancedFiltersToggle}
           style={{ marginLeft: "auto" }}
           aria-expanded={showAdvancedFilters}
           aria-label="Toggle advanced filters"
@@ -124,40 +165,33 @@ const TaskList = () => {
           <FilterContainer>
             <FilterButton
               $active={priorityFilter === "all"}
-              onClick={() => setPriorityFilter("all")}
+              onClick={() => handlePriorityFilterChange("all")}
             >
               All Priorities
             </FilterButton>
             <FilterButton
               $active={priorityFilter === "high"}
-              onClick={() => setPriorityFilter("high")}
+              onClick={() => handlePriorityFilterChange("high")}
               aria-label="Filter by high priority tasks"
             >
               <Priority priority="high" size="small" variant="dot" />
-              High (
-              {tasks.filter((t) => (t.priority || "medium") === "high").length})
+              High ({taskCounts.high})
             </FilterButton>
             <FilterButton
               $active={priorityFilter === "medium"}
-              onClick={() => setPriorityFilter("medium")}
+              onClick={() => handlePriorityFilterChange("medium")}
               aria-label="Filter by medium priority tasks"
             >
               <Priority priority="medium" size="small" variant="dot" />
-              Medium (
-              {
-                tasks.filter((t) => (t.priority || "medium") === "medium")
-                  .length
-              }
-              )
+              Medium ({taskCounts.medium})
             </FilterButton>
             <FilterButton
               $active={priorityFilter === "low"}
-              onClick={() => setPriorityFilter("low")}
+              onClick={() => handlePriorityFilterChange("low")}
               aria-label="Filter by low priority tasks"
             >
               <Priority priority="low" size="small" variant="dot" />
-              Low (
-              {tasks.filter((t) => (t.priority || "medium") === "low").length})
+              Low ({taskCounts.low})
             </FilterButton>
           </FilterContainer>
 
@@ -165,31 +199,30 @@ const TaskList = () => {
           <FilterContainer>
             <FilterButton
               $active={categoryFilter === "all"}
-              onClick={() => setCategoryFilter("all")}
+              onClick={() => handleCategoryFilterChange("all")}
             >
               All Categories
             </FilterButton>
-            {getCategoryOptions().map((option) => (
-              <FilterButton
-                key={option.value}
-                $active={categoryFilter === option.value}
-                onClick={() => setCategoryFilter(option.value)}
-                aria-label={`Filter by ${option.label} category tasks`}
-              >
-                <Category
-                  category={option.value}
-                  size="small"
-                  variant="default"
-                />
-                (
-                {
-                  tasks.filter(
-                    (t) => (t.category || "personal") === option.value
-                  ).length
-                }
-                )
-              </FilterButton>
-            ))}
+            {categoryOptions.map((option) => {
+              const count = tasks.filter(
+                (t) => (t.category || "personal") === option.value
+              ).length;
+              return (
+                <FilterButton
+                  key={option.value}
+                  $active={categoryFilter === option.value}
+                  onClick={() => handleCategoryFilterChange(option.value)}
+                  aria-label={`Filter by ${option.label} category tasks`}
+                >
+                  <Category
+                    category={option.value}
+                    size="small"
+                    variant="default"
+                  />
+                  ({count})
+                </FilterButton>
+              );
+            })}
           </FilterContainer>
 
           <SortContainer role="group" aria-labelledby="sort-options">
@@ -198,7 +231,7 @@ const TaskList = () => {
                 id="sort-priority"
                 type="checkbox"
                 checked={sortByPriority}
-                onChange={(e) => setSortByPriority(e.target.checked)}
+                onChange={(e) => handleSortToggle(e.target.checked)}
                 aria-describedby="sort-description"
               />
               Sort by Priority
@@ -246,7 +279,7 @@ const TaskList = () => {
             >
               {priorityFilter !== "all" && (
                 <button
-                  onClick={() => setPriorityFilter("all")}
+                  onClick={() => handlePriorityFilterChange("all")}
                   style={{
                     padding: "8px 16px",
                     background: "#6c5ce7",
@@ -262,7 +295,7 @@ const TaskList = () => {
               )}
               {categoryFilter !== "all" && (
                 <button
-                  onClick={() => setCategoryFilter("all")}
+                  onClick={() => handleCategoryFilterChange("all")}
                   style={{
                     padding: "8px 16px",
                     background: "#6c5ce7",
