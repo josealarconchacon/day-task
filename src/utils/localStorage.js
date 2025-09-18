@@ -62,15 +62,59 @@ export const getStorageInfo = () => {
 
   try {
     const used = new Blob(Object.values(localStorage)).size;
-    const total = 5 * 1024 * 1024;
+    const total = 5 * 1024 * 1024; // 5MB typical limit
 
     return {
       available: true,
       used: used,
       total: total,
       percentage: ((used / total) * 100).toFixed(2),
+      remaining: total - used,
     };
   } catch (error) {
     return { available: true, error: error.message };
+  }
+};
+
+// clear old or corrupted data
+export const clearStorage = (keys = [STORAGE_KEY]) => {
+  if (!isStorageAvailable()) {
+    return false;
+  }
+
+  try {
+    keys.forEach((key) => {
+      window.localStorage.removeItem(key);
+    });
+    console.info(`Cleared localStorage keys: ${keys.join(", ")}`);
+    return true;
+  } catch (error) {
+    console.error("Error clearing localStorage:", error);
+    return false;
+  }
+};
+
+// backup data to a downloadable JSON file
+export const exportData = (key = STORAGE_KEY) => {
+  try {
+    const data = getFromStorage(key, []);
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `day-task-backup-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    return true;
+  } catch (error) {
+    console.error("Error exporting data:", error);
+    return false;
   }
 };

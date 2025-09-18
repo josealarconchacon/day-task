@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getFromStorage,
   saveToStorage,
@@ -9,7 +9,9 @@ import {
 export const useLocalStorage = (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(true);
+  const initialValueRef = useRef(initialValue);
 
+  // re-run effect when key changes, not when initialValue reference changes
   useEffect(() => {
     if (!isStorageAvailable()) {
       console.warn("localStorage not available, using memory storage only");
@@ -18,15 +20,15 @@ export const useLocalStorage = (key, initialValue) => {
     }
 
     try {
-      const item = getFromStorage(key, initialValue);
+      const item = getFromStorage(key, initialValueRef.current);
       setStoredValue(item);
     } catch (error) {
       console.error("Error loading from localStorage:", error);
-      setStoredValue(initialValue);
+      setStoredValue(initialValueRef.current);
     } finally {
       setIsLoading(false);
     }
-  }, [key, initialValue]);
+  }, [key]);
 
   const setValue = useCallback(
     (value) => {
@@ -43,51 +45,11 @@ export const useLocalStorage = (key, initialValue) => {
         });
       } catch (error) {
         console.error("Error saving to localStorage:", error);
+        return;
       }
     },
     [key]
   );
 
   return [storedValue, setValue, isLoading];
-};
-
-// task specific storage with validation
-export const useTaskStorage = () => {
-  const [tasks, setTasks, isLoading] = useLocalStorage("dayTask_tasks", []);
-
-  const setValidatedTasks = useCallback(
-    (newTasks) => {
-      setTasks((prevTasks) => {
-        const valueToStore =
-          newTasks instanceof Function ? newTasks(prevTasks) : newTasks;
-
-        if (!Array.isArray(valueToStore)) {
-          console.warn(
-            "Tasks must be an array, received:",
-            typeof valueToStore
-          );
-          return prevTasks;
-        }
-
-        const validatedTasks = valueToStore.filter((task) => {
-          const isValid =
-            task &&
-            typeof task.id === "string" &&
-            typeof task.text === "string" &&
-            typeof task.completed === "boolean";
-
-          if (!isValid) {
-            console.warn("Invalid task structure:", task);
-          }
-
-          return isValid;
-        });
-
-        return validatedTasks;
-      });
-    },
-    [setTasks]
-  );
-
-  return [tasks, setValidatedTasks, isLoading];
 };

@@ -4,10 +4,7 @@ import TaskItem from "../TaskItem/TaskItem.jsx";
 import Priority from "../Priority/Priority.jsx";
 import Category from "../Category/Category.jsx";
 import { sortTasksByPriority } from "../../utils/priorityUtils.js";
-import {
-  getCategoryOptions,
-  getTaskCountByCategory,
-} from "../../utils/categoryUtils.js";
+import { getCategoryOptions } from "../../utils/categoryUtils.js";
 import {
   List,
   EmptyState,
@@ -18,7 +15,7 @@ import {
 } from "./StyledTaskList.jsx";
 
 const TaskList = () => {
-  const { tasks, isLoading } = useTasks();
+  const { tasks, isLoading, saveError } = useTasks();
   const [filter, setFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -26,27 +23,27 @@ const TaskList = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   let filteredTasks = tasks.filter((task) => {
-    // Filter by completion status
+    // filter by completion status
     if (filter === "active") return !task.completed;
     if (filter === "completed") return task.completed;
     return true;
   });
 
-  // Filter by priority if selected
+  // filter by priority if selected
   if (priorityFilter !== "all") {
     filteredTasks = filteredTasks.filter(
       (task) => (task.priority || "medium") === priorityFilter
     );
   }
 
-  // Filter by category if selected
+  // filter by category if selected
   if (categoryFilter !== "all") {
     filteredTasks = filteredTasks.filter(
       (task) => (task.category || "personal") === categoryFilter
     );
   }
 
-  // Sort by priority if enabled
+  // sort by priority if enabled
   if (sortByPriority) {
     filteredTasks = sortTasksByPriority(filteredTasks);
   }
@@ -72,7 +69,23 @@ const TaskList = () => {
 
   return (
     <div>
-      {/* Primary Filters - Always Visible */}
+      {/* Save Error Notification */}
+      {saveError && (
+        <div
+          style={{
+            padding: "8px 12px",
+            marginBottom: "16px",
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "6px",
+            color: "#dc2626",
+            fontSize: "14px",
+          }}
+        >
+          ⚠️ {saveError}
+        </div>
+      )}
+      {}
       <FilterContainer>
         <FilterButton
           $active={filter === "all"}
@@ -93,7 +106,7 @@ const TaskList = () => {
           Completed ({tasks.filter((t) => t.completed).length})
         </FilterButton>
 
-        {/* Toggle Advanced Filters */}
+        {}
         <FilterButton
           $active={showAdvancedFilters}
           onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
@@ -105,7 +118,7 @@ const TaskList = () => {
         </FilterButton>
       </FilterContainer>
 
-      {/* Advanced Filters - Progressive Disclosure */}
+      {}
       {showAdvancedFilters && (
         <>
           <FilterContainer>
@@ -148,7 +161,7 @@ const TaskList = () => {
             </FilterButton>
           </FilterContainer>
 
-          {/* Category Filters */}
+          {}
           <FilterContainer>
             <FilterButton
               $active={categoryFilter === "all"}
