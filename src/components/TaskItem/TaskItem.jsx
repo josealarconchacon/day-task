@@ -2,17 +2,22 @@ import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import Modal from "../Modal/Modal.jsx";
 import Priority, { PrioritySelector } from "../Priority/index.jsx";
+import Category, { CategorySelector } from "../Category/index.jsx";
 import TaskNotes from "../TaskNotes/TaskNotes.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import {
   TaskContainer,
+  TaskHeader,
   Checkbox,
   TaskText,
   TaskActions,
   EditInput,
   TaskContent,
   EditSection,
+  EditInputRow,
   TaskDetails,
+  TaskMainContent,
+  TaskMeta,
   EditNotesSection,
 } from "./StyledTaskItem.jsx";
 
@@ -20,6 +25,7 @@ const TaskItem = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editPriority, setEditPriority] = useState(task.priority || "medium");
+  const [editCategory, setEditCategory] = useState(task.category || "personal");
   const [editNotes, setEditNotes] = useState(task.notes || "");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -27,7 +33,7 @@ const TaskItem = ({ task }) => {
 
   const handleEdit = () => {
     if (editText.trim()) {
-      editTask(task.id, editText, editPriority, editNotes);
+      editTask(task.id, editText, editPriority, editCategory, editNotes);
       setIsEditing(false);
     }
   };
@@ -35,13 +41,20 @@ const TaskItem = ({ task }) => {
   const handleCancelEdit = () => {
     setEditText(task.text);
     setEditPriority(task.priority || "medium");
+    setEditCategory(task.category || "personal");
     setEditNotes(task.notes || "");
     setIsEditing(false);
   };
 
   const handleNotesEdit = () => {
     if (editNotes.trim() !== (task.notes || "").trim()) {
-      editTask(task.id, task.text, task.priority || "medium", editNotes);
+      editTask(
+        task.id,
+        task.text,
+        task.priority || "medium",
+        task.category || "personal",
+        editNotes
+      );
     }
     setIsEditingNotes(false);
   };
@@ -64,95 +77,112 @@ const TaskItem = ({ task }) => {
   return (
     <>
       <TaskContainer $priority={task.priority || "medium"}>
-        <Checkbox
-          type="checkbox"
-          checked={task.completed}
-          onChange={() => toggleTask(task.id)}
-        />
+        <TaskHeader>
+          <Checkbox
+            type="checkbox"
+            checked={task.completed}
+            onChange={() => toggleTask(task.id)}
+          />
 
-        <TaskDetails>
-          <TaskContent>
+          <TaskDetails>
             {isEditing ? (
               <EditSection>
-                <EditInput
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Task text..."
-                  autoFocus
-                />
-                <PrioritySelector
-                  value={editPriority}
-                  onChange={(e) => setEditPriority(e.target.value)}
-                />
+                <EditInputRow>
+                  <EditInput
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Task text..."
+                    autoFocus
+                  />
+                </EditInputRow>
+                <EditInputRow>
+                  <PrioritySelector
+                    value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value)}
+                  />
+                  <CategorySelector
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                  />
+                </EditInputRow>
               </EditSection>
             ) : (
-              <TaskText $completed={task.completed}>{task.text}</TaskText>
+              <TaskContent>
+                <TaskMeta>
+                  <TaskText $completed={task.completed}>{task.text}</TaskText>
+                  <Category
+                    category={task.category || "personal"}
+                    size="small"
+                    variant="default"
+                  />
+                  <Priority
+                    priority={task.priority || "medium"}
+                    size="small"
+                    variant="dot"
+                  />
+                </TaskMeta>
+              </TaskContent>
             )}
-          </TaskContent>
+          </TaskDetails>
+        </TaskHeader>
 
-          <EditNotesSection>
-            {/* Show notes preview if they exist */}
-            {task.notes &&
-              task.notes.trim() &&
-              !isEditing &&
-              !isEditingNotes && (
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    marginBottom: "4px",
-                    padding: "4px 8px",
-                    backgroundColor: "#f8f9fa",
-                    borderRadius: "4px",
-                    borderLeft: "3px solid #6c5ce7",
-                  }}
-                >
-                  <strong>Notes:</strong>{" "}
-                  {task.notes.length > 50
-                    ? task.notes.substring(0, 50) + "..."
-                    : task.notes}
-                </div>
-              )}
+        {/* Notes Section */}
+        <EditNotesSection>
+          {/* Show notes preview if they exist */}
+          {task.notes && task.notes.trim() && !isEditing && !isEditingNotes && (
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#666",
+                marginBottom: "4px",
+                padding: "4px 8px",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "4px",
+                borderLeft: "3px solid #6c5ce7",
+              }}
+            >
+              <strong>Notes:</strong>{" "}
+              {task.notes.length > 50
+                ? task.notes.substring(0, 50) + "..."
+                : task.notes}
+            </div>
+          )}
 
-            <TaskNotes
-              notes={isEditing || isEditingNotes ? editNotes : task.notes || ""}
-              onNotesChange={setEditNotes}
-              isEditing={isEditing || isEditingNotes}
-              placeholder="Add notes for this task..."
-              variant="compact"
-            />
-            {!isEditing && !isEditingNotes && (
+          <TaskNotes
+            notes={isEditing || isEditingNotes ? editNotes : task.notes || ""}
+            onNotesChange={setEditNotes}
+            isEditing={isEditing || isEditingNotes}
+            placeholder="Add notes for this task..."
+            variant="compact"
+          />
+          {!isEditing && !isEditingNotes && (
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => setIsEditingNotes(true)}
+              style={{ marginTop: "4px" }}
+            >
+              {task.notes && task.notes.trim() ? "Edit Notes" : "Add Notes"}
+            </Button>
+          )}
+          {isEditingNotes && (
+            <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+              <Button variant="primary" size="small" onClick={handleNotesEdit}>
+                Save Notes
+              </Button>
               <Button
                 variant="secondary"
                 size="small"
-                onClick={() => setIsEditingNotes(true)}
-                style={{ marginTop: "4px" }}
+                onClick={handleCancelNotesEdit}
               >
-                {task.notes && task.notes.trim() ? "Edit Notes" : "Add Notes"}
+                Cancel
               </Button>
-            )}
-            {isEditingNotes && (
-              <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={handleNotesEdit}
-                >
-                  Save Notes
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={handleCancelNotesEdit}
-                >
-                  Cancel
-                </Button>
-              </div>
-            )}
-          </EditNotesSection>
-        </TaskDetails>
+            </div>
+          )}
+        </EditNotesSection>
 
+        {/* Actions */}
         <TaskActions>
           {isEditing ? (
             <>
@@ -169,11 +199,6 @@ const TaskItem = ({ task }) => {
             </>
           ) : (
             <>
-              <Priority
-                priority={task.priority || "medium"}
-                size="small"
-                variant="dot"
-              />
               <Button
                 variant="secondary"
                 size="small"

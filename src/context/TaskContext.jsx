@@ -19,6 +19,7 @@ const taskReducer = (state, action) => {
         id: uuidv4(),
         text: action.payload.text,
         priority: action.payload.priority || "medium",
+        category: action.payload.category || "personal",
         completed: false,
         notes: action.payload.notes || "",
       };
@@ -51,6 +52,9 @@ const taskReducer = (state, action) => {
                 text: action.payload.newText,
                 ...(action.payload.priority && {
                   priority: action.payload.priority,
+                }),
+                ...(action.payload.category && {
+                  category: action.payload.category,
                 }),
                 ...(action.payload.notes !== undefined && {
                   notes: action.payload.notes,
@@ -108,8 +112,16 @@ export const TaskProvider = ({ children }) => {
     }
   }, [state.tasks, isLoading]);
 
-  const addTask = (text, priority = "medium", notes = "") => {
-    dispatch({ type: "add_task", payload: { text, priority, notes } });
+  const addTask = (
+    text,
+    priority = "medium",
+    category = "personal",
+    notes = ""
+  ) => {
+    dispatch({
+      type: "add_task",
+      payload: { text, priority, category, notes },
+    });
   };
 
   const deleteTask = (id) => {
@@ -120,8 +132,11 @@ export const TaskProvider = ({ children }) => {
     dispatch({ type: "toggle_task", payload: id });
   };
 
-  const editTask = (id, newText, priority, notes) => {
-    dispatch({ type: "edit_task", payload: { id, newText, priority, notes } });
+  const editTask = (id, newText, priority, category, notes) => {
+    dispatch({
+      type: "edit_task",
+      payload: { id, newText, priority, category, notes },
+    });
   };
 
   return (
