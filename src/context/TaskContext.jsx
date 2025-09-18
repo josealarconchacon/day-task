@@ -23,6 +23,7 @@ const taskReducer = (state, action) => {
             text: action.payload.text,
             priority: action.payload.priority || "medium",
             completed: false,
+            notes: action.payload.notes || "",
           },
           ...state.tasks,
         ],
@@ -51,6 +52,9 @@ const taskReducer = (state, action) => {
                 text: action.payload.newText,
                 ...(action.payload.priority && {
                   priority: action.payload.priority,
+                }),
+                ...(action.payload.notes !== undefined && {
+                  notes: action.payload.notes,
                 }),
               }
             : task
@@ -105,8 +109,8 @@ export const TaskProvider = ({ children }) => {
     }
   }, [state.tasks, isLoading]);
 
-  const addTask = (text, priority = "medium") => {
-    dispatch({ type: "add_task", payload: { text, priority } });
+  const addTask = (text, priority = "medium", notes = "") => {
+    dispatch({ type: "add_task", payload: { text, priority, notes } });
   };
 
   const deleteTask = (id) => {
@@ -117,8 +121,8 @@ export const TaskProvider = ({ children }) => {
     dispatch({ type: "toggle_task", payload: id });
   };
 
-  const editTask = (id, newText, priority) => {
-    dispatch({ type: "edit_task", payload: { id, newText, priority } });
+  const editTask = (id, newText, priority, notes) => {
+    dispatch({ type: "edit_task", payload: { id, newText, priority, notes } });
   };
 
   return (

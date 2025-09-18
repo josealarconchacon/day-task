@@ -4,6 +4,19 @@ export const Form = styled.form`
   margin-bottom: 30px;
 `;
 
+export const FormSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const NotesLabel = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c5ce7;
+  margin-bottom: 4px;
+`;
+
 export const FormRow = styled.div`
   display: flex;
   align-items: center;
@@ -55,5 +68,5 @@ export const Label = styled.label`
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  visibility: hidden; /* Hidden for cleaner look */
+  visibility: hidden;
 `;

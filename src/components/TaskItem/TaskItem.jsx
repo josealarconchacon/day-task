@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import Modal from "../Modal/Modal.jsx";
 import Priority, { PrioritySelector } from "../Priority/index.jsx";
+import TaskNotes from "../TaskNotes/TaskNotes.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import {
   TaskContainer,
@@ -11,18 +12,21 @@ import {
   EditInput,
   TaskContent,
   EditSection,
+  TaskDetails,
+  EditNotesSection,
 } from "./StyledTaskItem.jsx";
 
 const TaskItem = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editPriority, setEditPriority] = useState(task.priority || "medium");
+  const [editNotes, setEditNotes] = useState(task.notes || "");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
   const handleEdit = () => {
     if (editText.trim()) {
-      editTask(task.id, editText, editPriority);
+      editTask(task.id, editText, editPriority, editNotes);
       setIsEditing(false);
     }
   };
@@ -30,6 +34,7 @@ const TaskItem = ({ task }) => {
   const handleCancelEdit = () => {
     setEditText(task.text);
     setEditPriority(task.priority || "medium");
+    setEditNotes(task.notes || "");
     setIsEditing(false);
   };
 
@@ -52,32 +57,37 @@ const TaskItem = ({ task }) => {
           onChange={() => toggleTask(task.id)}
         />
 
-        <TaskContent>
-          {isEditing ? (
-            <EditSection>
-              <EditInput
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Task text..."
-                autoFocus
-              />
-              <PrioritySelector
-                value={editPriority}
-                onChange={(e) => setEditPriority(e.target.value)}
-              />
-            </EditSection>
-          ) : (
-            <>
+        <TaskDetails>
+          <TaskContent>
+            {isEditing ? (
+              <EditSection>
+                <EditInput
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Task text..."
+                  autoFocus
+                />
+                <PrioritySelector
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value)}
+                />
+              </EditSection>
+            ) : (
               <TaskText $completed={task.completed}>{task.text}</TaskText>
-              <Priority
-                priority={task.priority || "medium"}
-                size="small"
-                variant="dot"
-              />
-            </>
-          )}
-        </TaskContent>
+            )}
+          </TaskContent>
+
+          <EditNotesSection>
+            <TaskNotes
+              notes={isEditing ? editNotes : task.notes || ""}
+              onNotesChange={setEditNotes}
+              isEditing={isEditing}
+              placeholder="Add notes for this task..."
+              variant="compact"
+            />
+          </EditNotesSection>
+        </TaskDetails>
 
         <TaskActions>
           {isEditing ? (
@@ -95,6 +105,11 @@ const TaskItem = ({ task }) => {
             </>
           ) : (
             <>
+              <Priority
+                priority={task.priority || "medium"}
+                size="small"
+                variant="dot"
+              />
               <Button
                 variant="secondary"
                 size="small"

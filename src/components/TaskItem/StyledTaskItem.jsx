@@ -9,26 +9,22 @@ export const TaskContainer = styled.li`
   margin-bottom: 0;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  gap: 0; /* Let children control their own spacing */
+  gap: 0;
 
-  /* Subtle hover effect */
   &:hover {
     background-color: #fafbfc;
     border-bottom-color: #e1e5e9;
   }
 
-  /* Focus within for keyboard navigation */
   &:focus-within {
     background-color: #f8f9ff;
     border-bottom-color: #6c5ce7;
   }
 
-  /* Last item doesn't need border */
   &:last-child {
     border-bottom: none;
   }
 
-  /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     transition: background-color 0.2s ease;
   }
@@ -73,18 +69,26 @@ export const Checkbox = styled.input`
     box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
   }
 
-  /* High contrast mode support */
   @media (prefers-contrast: high) {
     border-width: 3px;
   }
 `;
 
-export const TaskContent = styled.div`
+export const TaskDetails = styled.div`
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-right: 16px;
+`;
+
+export const TaskContent = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-right: 16px;
+`;
+
+export const EditNotesSection = styled.div`
+  margin-top: 12px;
 `;
 
 export const TaskText = styled.span`
@@ -118,7 +122,7 @@ export const EditInput = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  min-width: 0; /* Allow flex shrinking */
+  min-width: 0;
 
   &:focus {
     outline: none;
