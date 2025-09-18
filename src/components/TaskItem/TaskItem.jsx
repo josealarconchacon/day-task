@@ -2,17 +2,22 @@ import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import Modal from "../Modal/Modal.jsx";
 import Priority, { PrioritySelector } from "../Priority/index.jsx";
+import Category, { CategorySelector } from "../Category/index.jsx";
 import TaskNotes from "../TaskNotes/TaskNotes.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import {
   TaskContainer,
+  TaskHeader,
   Checkbox,
   TaskText,
   TaskActions,
   EditInput,
   TaskContent,
   EditSection,
+  EditInputRow,
   TaskDetails,
+  TaskMainContent,
+  TaskMeta,
   EditNotesSection,
 } from "./StyledTaskItem.jsx";
 
@@ -20,13 +25,14 @@ const TaskItem = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editPriority, setEditPriority] = useState(task.priority || "medium");
+  const [editCategory, setEditCategory] = useState(task.category || "personal");
   const [editNotes, setEditNotes] = useState(task.notes || "");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
   const handleEdit = () => {
     if (editText.trim()) {
-      editTask(task.id, editText, editPriority, editNotes);
+      editTask(task.id, editText, editPriority, editCategory, editNotes);
       setIsEditing(false);
     }
   };
@@ -34,6 +40,7 @@ const TaskItem = ({ task }) => {
   const handleCancelEdit = () => {
     setEditText(task.text);
     setEditPriority(task.priority || "medium");
+    setEditCategory(task.category || "personal");
     setEditNotes(task.notes || "");
     setIsEditing(false);
   };
@@ -51,44 +58,68 @@ const TaskItem = ({ task }) => {
   return (
     <>
       <TaskContainer $priority={task.priority || "medium"}>
-        <Checkbox
-          type="checkbox"
-          checked={task.completed}
-          onChange={() => toggleTask(task.id)}
-        />
+        <TaskHeader>
+          <Checkbox
+            type="checkbox"
+            checked={task.completed}
+            onChange={() => toggleTask(task.id)}
+          />
 
-        <TaskDetails>
-          <TaskContent>
+          <TaskDetails>
             {isEditing ? (
               <EditSection>
-                <EditInput
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Task text..."
-                  autoFocus
-                />
-                <PrioritySelector
-                  value={editPriority}
-                  onChange={(e) => setEditPriority(e.target.value)}
-                />
+                <EditInputRow>
+                  <EditInput
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Task text..."
+                    autoFocus
+                  />
+                </EditInputRow>
+                <EditInputRow>
+                  <PrioritySelector
+                    value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value)}
+                  />
+                  <CategorySelector
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                  />
+                </EditInputRow>
               </EditSection>
             ) : (
-              <TaskText $completed={task.completed}>{task.text}</TaskText>
+              <TaskContent>
+                <TaskMeta>
+                  <TaskText $completed={task.completed}>{task.text}</TaskText>
+                  <Category
+                    category={task.category || "personal"}
+                    size="small"
+                    variant="default"
+                  />
+                  <Priority
+                    priority={task.priority || "medium"}
+                    size="small"
+                    variant="dot"
+                  />
+                </TaskMeta>
+              </TaskContent>
             )}
-          </TaskContent>
+          </TaskDetails>
+        </TaskHeader>
 
-          <EditNotesSection>
-            <TaskNotes
-              notes={isEditing ? editNotes : task.notes || ""}
-              onNotesChange={setEditNotes}
-              isEditing={isEditing}
-              placeholder="Add notes for this task..."
-              variant="compact"
-            />
-          </EditNotesSection>
-        </TaskDetails>
+        {/* Notes Section */}
+        <EditNotesSection>
+          <TaskNotes
+            notes={isEditing ? editNotes : task.notes || ""}
+            onNotesChange={setEditNotes}
+            isEditing={isEditing}
+            placeholder="Add notes for this task..."
+            variant="compact"
+          />
+        </EditNotesSection>
 
+        {/* Actions */}
         <TaskActions>
           {isEditing ? (
             <>
@@ -105,11 +136,6 @@ const TaskItem = ({ task }) => {
             </>
           ) : (
             <>
-              <Priority
-                priority={task.priority || "medium"}
-                size="small"
-                variant="dot"
-              />
               <Button
                 variant="secondary"
                 size="small"

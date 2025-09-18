@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { useTasks } from "../../hooks/useTasks";
 import TaskItem from "../TaskItem/TaskItem.jsx";
 import Priority from "../Priority/Priority.jsx";
+import Category from "../Category/Category.jsx";
 import { sortTasksByPriority } from "../../utils/priorityUtils.js";
+import {
+  getCategoryOptions,
+  getTaskCountByCategory,
+} from "../../utils/categoryUtils.js";
 import {
   List,
   EmptyState,
@@ -16,6 +21,7 @@ const TaskList = () => {
   const { tasks, isLoading } = useTasks();
   const [filter, setFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortByPriority, setSortByPriority] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -30,6 +36,13 @@ const TaskList = () => {
   if (priorityFilter !== "all") {
     filteredTasks = filteredTasks.filter(
       (task) => (task.priority || "medium") === priorityFilter
+    );
+  }
+
+  // Filter by category if selected
+  if (categoryFilter !== "all") {
+    filteredTasks = filteredTasks.filter(
+      (task) => (task.category || "personal") === categoryFilter
     );
   }
 
@@ -135,6 +148,37 @@ const TaskList = () => {
             </FilterButton>
           </FilterContainer>
 
+          {/* Category Filters */}
+          <FilterContainer>
+            <FilterButton
+              $active={categoryFilter === "all"}
+              onClick={() => setCategoryFilter("all")}
+            >
+              All Categories
+            </FilterButton>
+            {getCategoryOptions().map((option) => (
+              <FilterButton
+                key={option.value}
+                $active={categoryFilter === option.value}
+                onClick={() => setCategoryFilter(option.value)}
+                aria-label={`Filter by ${option.label} category tasks`}
+              >
+                <Category
+                  category={option.value}
+                  size="small"
+                  variant="default"
+                />
+                (
+                {
+                  tasks.filter(
+                    (t) => (t.category || "personal") === option.value
+                  ).length
+                }
+                )
+              </FilterButton>
+            ))}
+          </FilterContainer>
+
           <SortContainer role="group" aria-labelledby="sort-options">
             <SortLabel htmlFor="sort-priority">
               <input
@@ -168,30 +212,58 @@ const TaskList = () => {
         <EmptyState>
           <h3>
             No {filter}{" "}
-            {priorityFilter !== "all" ? priorityFilter + " priority" : ""} tasks
+            {priorityFilter !== "all" ? priorityFilter + " priority" : ""}{" "}
+            {categoryFilter !== "all" ? categoryFilter + " category" : ""} tasks
           </h3>
           <p>
             {filter === "completed"
               ? "Complete some tasks to see them here!"
-              : priorityFilter !== "all"
-              ? `No ${priorityFilter} priority tasks found. Try adjusting your filters.`
+              : priorityFilter !== "all" || categoryFilter !== "all"
+              ? `No tasks found with current filters. Try adjusting your filters.`
               : "All tasks are completed! 🎉"}
           </p>
-          {priorityFilter !== "all" && (
-            <button
-              onClick={() => setPriorityFilter("all")}
+          {(priorityFilter !== "all" || categoryFilter !== "all") && (
+            <div
               style={{
                 marginTop: "12px",
-                padding: "8px 16px",
-                background: "#6c5ce7",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
+                display: "flex",
+                gap: "8px",
+                flexWrap: "wrap",
               }}
             >
-              Show All Priorities
-            </button>
+              {priorityFilter !== "all" && (
+                <button
+                  onClick={() => setPriorityFilter("all")}
+                  style={{
+                    padding: "8px 16px",
+                    background: "#6c5ce7",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  Show All Priorities
+                </button>
+              )}
+              {categoryFilter !== "all" && (
+                <button
+                  onClick={() => setCategoryFilter("all")}
+                  style={{
+                    padding: "8px 16px",
+                    background: "#6c5ce7",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  Show All Categories
+                </button>
+              )}
+            </div>
           )}
         </EmptyState>
       )}
