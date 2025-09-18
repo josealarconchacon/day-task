@@ -20,7 +20,8 @@ const taskReducer = (state, action) => {
         tasks: [
           {
             id: uuidv4(),
-            text: action.payload,
+            text: action.payload.text,
+            priority: action.payload.priority || "medium",
             completed: false,
           },
           ...state.tasks,
@@ -45,7 +46,13 @@ const taskReducer = (state, action) => {
         ...state,
         tasks: state.tasks.map((task) =>
           task.id === action.payload.id
-            ? { ...task, text: action.payload.newText }
+            ? {
+                ...task,
+                text: action.payload.newText,
+                ...(action.payload.priority && {
+                  priority: action.payload.priority,
+                }),
+              }
             : task
         ),
       };
@@ -98,8 +105,8 @@ export const TaskProvider = ({ children }) => {
     }
   }, [state.tasks, isLoading]);
 
-  const addTask = (text) => {
-    dispatch({ type: "add_task", payload: text });
+  const addTask = (text, priority = "medium") => {
+    dispatch({ type: "add_task", payload: { text, priority } });
   };
 
   const deleteTask = (id) => {
@@ -110,8 +117,8 @@ export const TaskProvider = ({ children }) => {
     dispatch({ type: "toggle_task", payload: id });
   };
 
-  const editTask = (id, newText) => {
-    dispatch({ type: "edit_task", payload: { id, newText } });
+  const editTask = (id, newText, priority) => {
+    dispatch({ type: "edit_task", payload: { id, newText, priority } });
   };
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import Modal from "../Modal/Modal.jsx";
+import Priority, { PrioritySelector } from "../Priority/index.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import {
   TaskContainer,
@@ -8,23 +9,27 @@ import {
   TaskText,
   TaskActions,
   EditInput,
+  TaskContent,
+  EditSection,
 } from "./StyledTaskItem.jsx";
 
 const TaskItem = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
+  const [editPriority, setEditPriority] = useState(task.priority || "medium");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
   const handleEdit = () => {
     if (editText.trim()) {
-      editTask(task.id, editText);
+      editTask(task.id, editText, editPriority);
       setIsEditing(false);
     }
   };
 
   const handleCancelEdit = () => {
     setEditText(task.text);
+    setEditPriority(task.priority || "medium");
     setIsEditing(false);
   };
 
@@ -40,23 +45,39 @@ const TaskItem = ({ task }) => {
 
   return (
     <>
-      <TaskContainer>
+      <TaskContainer $priority={task.priority || "medium"}>
         <Checkbox
           type="checkbox"
           checked={task.completed}
           onChange={() => toggleTask(task.id)}
         />
 
-        {isEditing ? (
-          <EditInput
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-            onKeyDown={handleKeyPress}
-            autoFocus
-          />
-        ) : (
-          <TaskText $completed={task.completed}>{task.text}</TaskText>
-        )}
+        <TaskContent>
+          {isEditing ? (
+            <EditSection>
+              <EditInput
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Task text..."
+                autoFocus
+              />
+              <PrioritySelector
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value)}
+              />
+            </EditSection>
+          ) : (
+            <>
+              <TaskText $completed={task.completed}>{task.text}</TaskText>
+              <Priority
+                priority={task.priority || "medium"}
+                size="small"
+                variant="dot"
+              />
+            </>
+          )}
+        </TaskContent>
 
         <TaskActions>
           {isEditing ? (
