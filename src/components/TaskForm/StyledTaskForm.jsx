@@ -70,3 +70,39 @@ export const Label = styled.label`
   color: #333;
   visibility: hidden;
 `;
+
+export const NotesTextarea = styled.textarea`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 60px;
+  max-height: 120px;
+  background: #fafbfc;
+  color: #2d3436;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #6c5ce7;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+  }
+
+  &:hover {
+    background: #fafbfc;
+  }
+
+  &::placeholder {
+    color: #a0a6b1;
+    font-style: italic;
+  }
+
+  @media (prefers-contrast: high) {
+    border-width: 2px;
+  }
+`;

@@ -2,8 +2,14 @@ import React, { useState } from "react";
 import Button from "../Button/Button.jsx";
 import { useTasks } from "../../hooks/useTasks";
 import { PrioritySelector } from "../Priority/index.jsx";
-import TaskNotes from "../TaskNotes/TaskNotes.jsx";
-import { Form, Input, FormRow, Label, FormSection } from "./StyledTaskForm.jsx";
+import {
+  Form,
+  Input,
+  FormRow,
+  Label,
+  FormSection,
+  NotesTextarea,
+} from "./StyledTaskForm.jsx";
 
 const TaskForm = () => {
   const [taskText, setTaskText] = useState("");
@@ -43,12 +49,12 @@ const TaskForm = () => {
             Add
           </Button>
         </FormRow>
-        <TaskNotes
-          notes={notes}
-          onNotesChange={setNotes}
-          isEditing={true}
+        <NotesTextarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
           placeholder="Add notes (optional)..."
-          variant="minimal"
+          rows="3"
+          maxLength="500"
         />
       </FormSection>
     </Form>

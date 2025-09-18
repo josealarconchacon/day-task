@@ -21,6 +21,7 @@ const TaskItem = ({ task }) => {
   const [editText, setEditText] = useState(task.text);
   const [editPriority, setEditPriority] = useState(task.priority || "medium");
   const [editNotes, setEditNotes] = useState(task.notes || "");
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
@@ -36,6 +37,18 @@ const TaskItem = ({ task }) => {
     setEditPriority(task.priority || "medium");
     setEditNotes(task.notes || "");
     setIsEditing(false);
+  };
+
+  const handleNotesEdit = () => {
+    if (editNotes.trim() !== (task.notes || "").trim()) {
+      editTask(task.id, task.text, task.priority || "medium", editNotes);
+    }
+    setIsEditingNotes(false);
+  };
+
+  const handleCancelNotesEdit = () => {
+    setEditNotes(task.notes || "");
+    setIsEditingNotes(false);
   };
 
   const handleKeyPress = (e) => {
@@ -79,13 +92,64 @@ const TaskItem = ({ task }) => {
           </TaskContent>
 
           <EditNotesSection>
+            {/* Show notes preview if they exist */}
+            {task.notes &&
+              task.notes.trim() &&
+              !isEditing &&
+              !isEditingNotes && (
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#666",
+                    marginBottom: "4px",
+                    padding: "4px 8px",
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: "4px",
+                    borderLeft: "3px solid #6c5ce7",
+                  }}
+                >
+                  <strong>Notes:</strong>{" "}
+                  {task.notes.length > 50
+                    ? task.notes.substring(0, 50) + "..."
+                    : task.notes}
+                </div>
+              )}
+
             <TaskNotes
-              notes={isEditing ? editNotes : task.notes || ""}
+              notes={isEditing || isEditingNotes ? editNotes : task.notes || ""}
               onNotesChange={setEditNotes}
-              isEditing={isEditing}
+              isEditing={isEditing || isEditingNotes}
               placeholder="Add notes for this task..."
               variant="compact"
             />
+            {!isEditing && !isEditingNotes && (
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setIsEditingNotes(true)}
+                style={{ marginTop: "4px" }}
+              >
+                {task.notes && task.notes.trim() ? "Edit Notes" : "Add Notes"}
+              </Button>
+            )}
+            {isEditingNotes && (
+              <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={handleNotesEdit}
+                >
+                  Save Notes
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={handleCancelNotesEdit}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
           </EditNotesSection>
         </TaskDetails>
 

@@ -68,7 +68,13 @@ const TaskNotes = ({
         <NotesContainer $minimal={true}>
           <NotesTextarea
             value={localNotes}
-            onChange={(e) => setLocalNotes(e.target.value)}
+            onChange={(e) => {
+              setLocalNotes(e.target.value);
+              // In minimal mode, immediately update parent state
+              if (onNotesChange) {
+                onNotesChange(e.target.value);
+              }
+            }}
             placeholder={placeholder}
             rows="1"
             maxLength="500"
@@ -82,7 +88,13 @@ const TaskNotes = ({
       <NotesContainer>
         <NotesTextarea
           value={localNotes}
-          onChange={(e) => setLocalNotes(e.target.value)}
+          onChange={(e) => {
+            setLocalNotes(e.target.value);
+            // In editing mode, immediately update parent state
+            if (onNotesChange) {
+              onNotesChange(e.target.value);
+            }
+          }}
           placeholder={placeholder}
           rows="3"
           maxLength="500"

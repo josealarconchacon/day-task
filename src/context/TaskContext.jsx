@@ -14,20 +14,19 @@ const taskReducer = (state, action) => {
         ...state,
         tasks: action.payload,
       };
-    case "add_task":
+    case "add_task": {
+      const newTask = {
+        id: uuidv4(),
+        text: action.payload.text,
+        priority: action.payload.priority || "medium",
+        completed: false,
+        notes: action.payload.notes || "",
+      };
       return {
         ...state,
-        tasks: [
-          {
-            id: uuidv4(),
-            text: action.payload.text,
-            priority: action.payload.priority || "medium",
-            completed: false,
-            notes: action.payload.notes || "",
-          },
-          ...state.tasks,
-        ],
+        tasks: [newTask, ...state.tasks],
       };
+    }
     case "delete_task":
       return {
         ...state,
