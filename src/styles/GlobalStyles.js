@@ -13,8 +13,10 @@ export const GlobalStyle = createGlobalStyle`
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #fafbfc;
-    color: #202124;
+    background: linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(226, 226, 226) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #1d1d1f;
     line-height: 1.6;
   }
 
@@ -31,8 +33,8 @@ export const AppContainer = styled.div`
 `;
 
 export const Header = styled.header`
-  text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  padding: 0;
 `;
 
 export const Title = styled.h1`
