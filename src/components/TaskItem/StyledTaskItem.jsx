@@ -111,7 +111,12 @@ export const TaskMainContent = styled.div`
 `;
 
 export const EditNotesSection = styled.div`
-  margin-top: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
 `;
 
 export const TaskText = styled.span`
@@ -175,15 +180,25 @@ export const TaskMeta = styled.div`
 
 export const TaskActions = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f3f4;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(248, 249, 250, 0.5);
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 0 0 12px 12px;
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 `;
 
@@ -209,6 +224,6 @@ export const EditInput = styled.input`
 
   @media (max-width: 768px) {
     padding: 10px 14px;
-    font-size: 16px; 
+    font-size: 16px;
   }
 `;

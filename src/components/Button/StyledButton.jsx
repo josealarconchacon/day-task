@@ -2,57 +2,62 @@ import styled, { css } from "styled-components";
 
 const variantStyles = {
   primary: css`
-    background-color: #6c5ce7;
+    background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
     color: white;
-    border: 1px solid #6c5ce7;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
     &:hover:not(:disabled) {
-      background-color: #5d4ec3;
-      border-color: #5d4ec3;
+      background: linear-gradient(135deg, #0056cc 0%, #4a4ac4 100%);
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
     }
   `,
   secondary: css`
-    background-color: white;
-    color: #5f6368;
-    border: 1px solid #dadce0;
+    background: rgba(255, 255, 255, 0.9);
+    color: #374151;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
     &:hover:not(:disabled) {
-      background-color: #f8f9fa;
-      border-color: #5f6368;
+      background: rgba(255, 255, 255, 1);
+      border-color: rgba(0, 0, 0, 0.15);
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   `,
   danger: css`
-    background-color: #ea4335;
+    background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
     color: white;
-    border: 1px solid #ea4335;
+    border: none;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
     &:hover:not(:disabled) {
-      background-color: #d33b2c;
-      border-color: #d33b2c;
+      background: linear-gradient(135deg, #e6342a 0%, #ff5252 100%);
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(234, 67, 53, 0.25);
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
     }
   `,
 };
 
 const sizeStyles = {
   small: css`
-    padding: 8px 16px;
+    padding: 10px 18px;
     font-size: 13px;
-    border-radius: 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   `,
 };
 
 export const StyledButton = styled.button`
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   outline: none;
+  position: relative;
+  overflow: hidden;
 
   ${(props) => variantStyles[props.$variant || "primary"]}
   ${(props) => sizeStyles[props.$size]}
