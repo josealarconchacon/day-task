@@ -1,8 +1,8 @@
 import { supabase, TASKS_TABLE } from "../lib/supabase.js";
 
-// Task service for all database operations
+// service for all database operations
 export class TaskService {
-  // Get all tasks
+  // get all tasks
   static async getTasks() {
     try {
       const { data, error } = await supabase
@@ -18,7 +18,7 @@ export class TaskService {
     }
   }
 
-  // Add a new task
+  // add a new task
   static async addTask(taskData) {
     try {
       const { data, error } = await supabase
@@ -35,7 +35,7 @@ export class TaskService {
     }
   }
 
-  // Update a task
+  // update a task
   static async updateTask(id, updates) {
     try {
       const { data, error } = await supabase
@@ -56,7 +56,7 @@ export class TaskService {
     }
   }
 
-  // Delete a task
+  // delete a task
   static async deleteTask(id) {
     try {
       const { error } = await supabase.from(TASKS_TABLE).delete().eq("id", id);
@@ -69,12 +69,12 @@ export class TaskService {
     }
   }
 
-  // Toggle task completion
+  // toggle task completion
   static async toggleTask(id, completed) {
     return this.updateTask(id, { completed });
   }
 
-  // Subscribe to real-time changes
+  // subscribe to real-time changes
   static subscribeToTasks(callback) {
     return supabase
       .channel("tasks_changes")
@@ -90,7 +90,7 @@ export class TaskService {
       .subscribe();
   }
 
-  // Unsubscribe from real-time changes
+  // unsubscribe from real-time changes
   static unsubscribe(subscription) {
     if (subscription) {
       supabase.removeChannel(subscription);
