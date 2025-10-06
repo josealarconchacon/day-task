@@ -1,14 +1,9 @@
 import React, { useReducer, useEffect, useRef, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TaskContext } from "./TaskContext.js";
-import {
-  getFromStorage,
-  saveToStorage,
-  isStorageAvailable,
-} from "../utils/localStorage.js";
+import { TaskService } from "../services/taskService.js";
 import {
   TIMEOUTS,
-  STORAGE_KEYS,
   DEFAULT_VALUES,
   ERROR_MESSAGES,
 } from "../constants/index.js";
@@ -67,7 +62,7 @@ const taskReducer = (state, action) => {
         category: action.payload.category || DEFAULT_VALUES.CATEGORY,
         completed: false,
         notes: action.payload.notes || DEFAULT_VALUES.NOTES,
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       };
 
       // validate before adding
@@ -81,11 +76,45 @@ const taskReducer = (state, action) => {
         tasks: [newTask, ...state.tasks],
       };
     }
+    case "add_task_from_db": {
+      // Add task from real-time subscription
+      const task = action.payload;
+      if (!validateTask(task)) {
+        console.warn("Invalid task from database, skipping:", task);
+        return state;
+      }
+
+      // Check if task already exists to avoid duplicates
+      const exists = state.tasks.some((t) => t.id === task.id);
+      if (exists) return state;
+
+      return {
+        ...state,
+        tasks: [task, ...state.tasks],
+      };
+    }
+    case "update_task_from_db": {
+      // Update task from real-time subscription
+      const updatedTask = action.payload;
+      return {
+        ...state,
+        tasks: state.tasks.map((task) =>
+          task.id === updatedTask.id ? updatedTask : task
+        ),
+      };
+    }
     case "delete_task":
       return {
         ...state,
         tasks: state.tasks.filter((task) => task.id !== action.payload),
       };
+    case "delete_task_from_db": {
+      // Delete task from real-time subscription
+      return {
+        ...state,
+        tasks: state.tasks.filter((task) => task.id !== action.payload),
+      };
+    }
     case "toggle_task":
       return {
         ...state,
@@ -94,7 +123,7 @@ const taskReducer = (state, action) => {
             ? {
                 ...task,
                 completed: !task.completed,
-                updatedAt: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
               }
             : task
         ),
@@ -107,7 +136,7 @@ const taskReducer = (state, action) => {
         ...(action.payload.notes !== undefined && {
           notes: action.payload.notes,
         }),
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       return {
@@ -126,51 +155,30 @@ const initialState = {
   tasks: [],
 };
 
-// localStorage integration with debouncing
+// Supabase integration with real-time updates
 export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
   const [isLoading, setIsLoading] = React.useState(true);
   const [saveError, setSaveError] = React.useState(null);
   const isInitialized = useRef(false);
-  const saveTimeoutRef = useRef(null);
+  const subscriptionRef = useRef(null);
 
-  // debounced save function
-  const debouncedSave = useCallback((tasks) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      try {
-        if (isStorageAvailable()) {
-          const success = saveToStorage(STORAGE_KEYS.TASKS, tasks);
-          if (success) {
-            setSaveError(null);
-          } else {
-            setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-          }
-        }
-      } catch (error) {
-        console.error("Error saving tasks to localStorage:", error);
-        setSaveError(ERROR_MESSAGES.QUOTA_EXCEEDED);
-      }
-    }, TIMEOUTS.SAVE_DEBOUNCE_DELAY);
-  }, []);
-
-  // load tasks from localStorage on mount
+  // Load tasks from Supabase on mount
   useEffect(() => {
     const loadInitialTasks = async () => {
       try {
-        if (isStorageAvailable()) {
-          const savedTasks = getFromStorage(STORAGE_KEYS.TASKS, []);
-          dispatch({ type: "load_tasks", payload: savedTasks });
+        const { data, error } = await TaskService.getTasks();
+        if (error) {
+          console.error("Error loading tasks from Supabase:", error);
+          setSaveError(ERROR_MESSAGES.LOAD_FAILED);
+          dispatch({ type: "load_tasks", payload: [] });
         } else {
-          console.warn(
-            "localStorage not available, running in memory-only mode"
-          );
+          dispatch({ type: "load_tasks", payload: data || [] });
+          setSaveError(null);
         }
       } catch (error) {
-        console.error("Error loading tasks from localStorage:", error);
+        console.error("Error loading tasks:", error);
+        setSaveError(ERROR_MESSAGES.LOAD_FAILED);
         dispatch({ type: "load_tasks", payload: [] });
       } finally {
         setIsLoading(false);
@@ -181,43 +189,166 @@ export const TaskProvider = ({ children }) => {
     loadInitialTasks();
   }, []);
 
-  // save tasks to localStorage with debouncing
+  // Set up real-time subscription
   useEffect(() => {
-    if (isInitialized.current && !isLoading) {
-      debouncedSave(state.tasks);
-    }
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [state.tasks, isLoading, debouncedSave]);
+    if (isInitialized.current) {
+      const subscription = TaskService.subscribeToTasks((payload) => {
+        console.log("Real-time update received:", payload);
 
-  const addTask = (
+        switch (payload.eventType) {
+          case "INSERT":
+            dispatch({ type: "add_task_from_db", payload: payload.new });
+            break;
+          case "UPDATE":
+            dispatch({ type: "update_task_from_db", payload: payload.new });
+            break;
+          case "DELETE":
+            dispatch({ type: "delete_task_from_db", payload: payload.old.id });
+            break;
+          default:
+            break;
+        }
+      });
+
+      subscriptionRef.current = subscription;
+
+      return () => {
+        if (subscriptionRef.current) {
+          TaskService.unsubscribe(subscriptionRef.current);
+        }
+      };
+    }
+  }, [isInitialized.current]);
+
+  const addTask = async (
     text,
     priority = DEFAULT_VALUES.PRIORITY,
     category = DEFAULT_VALUES.CATEGORY,
     notes = DEFAULT_VALUES.NOTES
   ) => {
+    // Optimistic update - add to UI immediately
+    const optimisticTask = {
+      id: uuidv4(),
+      text: text?.trim() || "",
+      priority,
+      category,
+      completed: false,
+      notes,
+      created_at: new Date().toISOString(),
+    };
+
     dispatch({
       type: "add_task",
-      payload: { text, priority, category, notes },
+      payload: optimisticTask,
     });
+
+    // Save to database
+    try {
+      const { data, error } = await TaskService.addTask(optimisticTask);
+      if (error) {
+        console.error("Error saving task to database:", error);
+        setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+        // Remove the optimistic task on error
+        dispatch({ type: "delete_task", payload: optimisticTask.id });
+      } else {
+        setSaveError(null);
+        // Update with the actual task from database (includes server-generated fields)
+        dispatch({ type: "update_task_from_db", payload: data });
+      }
+    } catch (error) {
+      console.error("Error adding task:", error);
+      setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+      dispatch({ type: "delete_task", payload: optimisticTask.id });
+    }
   };
 
-  const deleteTask = (id) => {
+  const deleteTask = async (id) => {
+    // Optimistic update - remove from UI immediately
     dispatch({ type: "delete_task", payload: id });
+
+    // Delete from database
+    try {
+      const { error } = await TaskService.deleteTask(id);
+      if (error) {
+        console.error("Error deleting task from database:", error);
+        setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+        // Reload tasks to restore the deleted task
+        const { data } = await TaskService.getTasks();
+        dispatch({ type: "load_tasks", payload: data || [] });
+      } else {
+        setSaveError(null);
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+      // Reload tasks to restore the deleted task
+      const { data } = await TaskService.getTasks();
+      dispatch({ type: "load_tasks", payload: data || [] });
+    }
   };
 
-  const toggleTask = (id) => {
+  const toggleTask = async (id) => {
+    // Find the current task to get its completion status
+    const currentTask = state.tasks.find((task) => task.id === id);
+    if (!currentTask) return;
+
+    const newCompleted = !currentTask.completed;
+
+    // Optimistic update - update UI immediately
     dispatch({ type: "toggle_task", payload: id });
+
+    // Update in database
+    try {
+      const { error } = await TaskService.toggleTask(id, newCompleted);
+      if (error) {
+        console.error("Error updating task in database:", error);
+        setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+        // Revert the optimistic update
+        dispatch({ type: "toggle_task", payload: id });
+      } else {
+        setSaveError(null);
+      }
+    } catch (error) {
+      console.error("Error toggling task:", error);
+      setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+      // Revert the optimistic update
+      dispatch({ type: "toggle_task", payload: id });
+    }
   };
 
-  const editTask = (id, newText, priority, category, notes) => {
+  const editTask = async (id, newText, priority, category, notes) => {
+    // Optimistic update - update UI immediately
     dispatch({
       type: "edit_task",
       payload: { id, newText, priority, category, notes },
     });
+
+    // Update in database
+    try {
+      const updates = {
+        text: newText?.trim(),
+        ...(priority && { priority }),
+        ...(category && { category }),
+        ...(notes !== undefined && { notes }),
+      };
+
+      const { error } = await TaskService.updateTask(id, updates);
+      if (error) {
+        console.error("Error updating task in database:", error);
+        setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+        // Reload tasks to restore the original state
+        const { data } = await TaskService.getTasks();
+        dispatch({ type: "load_tasks", payload: data || [] });
+      } else {
+        setSaveError(null);
+      }
+    } catch (error) {
+      console.error("Error editing task:", error);
+      setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+      // Reload tasks to restore the original state
+      const { data } = await TaskService.getTasks();
+      dispatch({ type: "load_tasks", payload: data || [] });
+    }
   };
 
   return (
