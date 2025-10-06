@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Form = styled.form`
-  margin-bottom: 30px;
+  margin-bottom: 0;
 `;
 
 export const FormSection = styled.div`
@@ -13,7 +13,7 @@ export const FormSection = styled.div`
 export const NotesLabel = styled.label`
   font-size: 14px;
   font-weight: 500;
-  color: #6c5ce7;
+  color: #667eea;
   margin-bottom: 4px;
 `;
 
@@ -21,16 +21,17 @@ export const FormRow = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: #f8fafc;
   border-radius: 12px;
   padding: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f0f0;
-  transition: border-color 0.2s ease;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
 
   &:focus-within {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
   }
 
   @media (max-width: 768px) {
@@ -47,14 +48,14 @@ export const Input = styled.input`
   border: none;
   background: transparent;
   font-size: 16px;
-  color: #2d3436;
+  color: #1a202c;
 
   &:focus {
     outline: none;
   }
 
   &::placeholder {
-    color: #a0a6b1;
+    color: #718096;
   }
 
   @media (max-width: 768px) {
@@ -74,7 +75,7 @@ export const Label = styled.label`
 export const NotesTextarea = styled.textarea`
   width: 100%;
   padding: 12px;
-  border: 1px solid #e1e5e9;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
@@ -82,23 +83,23 @@ export const NotesTextarea = styled.textarea`
   resize: vertical;
   min-height: 60px;
   max-height: 120px;
-  background: #fafbfc;
-  color: #2d3436;
+  background: #f8fafc;
+  color: #1a202c;
   transition: all 0.2s ease;
 
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
+    border-color: #667eea;
     background: white;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
 
   &:hover {
-    background: #fafbfc;
+    background: #f1f5f9;
   }
 
   &::placeholder {
-    color: #a0a6b1;
+    color: #718096;
     font-style: italic;
   }
 

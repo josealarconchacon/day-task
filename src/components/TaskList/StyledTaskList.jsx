@@ -41,10 +41,10 @@ export const FilterContainer = styled.div`
 
 export const FilterButton = styled.button`
   padding: 10px 16px;
-  border: 1px solid ${(props) => (props.$active ? "#6c5ce7" : "#dadce0")};
+  border: 1px solid ${(props) => (props.$active ? "#667eea" : "#e2e8f0")};
   border-radius: 20px;
-  background-color: ${(props) => (props.$active ? "#6c5ce7" : "white")};
-  color: ${(props) => (props.$active ? "white" : "#5f6368")};
+  background-color: ${(props) => (props.$active ? "#667eea" : "white")};
+  color: ${(props) => (props.$active ? "white" : "#4a5568")};
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -55,8 +55,8 @@ export const FilterButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background-color: ${(props) => (props.$active ? "#5d4ec3" : "#f8f9fa")};
-    border-color: ${(props) => (props.$active ? "#5d4ec3" : "#5f6368")};
+    background-color: ${(props) => (props.$active ? "#5a67d8" : "#f7fafc")};
+    border-color: ${(props) => (props.$active ? "#5a67d8" : "#667eea")};
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
@@ -83,14 +83,14 @@ export const FilterButton = styled.button`
 export const SortContainer = styled.div`
   margin-bottom: 24px;
   padding: 16px;
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
   border-radius: 12px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: #f1f3f4;
-    border-color: #d1d5db;
+    background-color: #f1f5f9;
+    border-color: #cbd5e0;
   }
 `;
 
@@ -100,12 +100,12 @@ export const SortLabel = styled.label`
   gap: 10px;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: #4a5568;
   cursor: pointer;
   transition: color 0.15s ease;
 
   &:hover {
-    color: #6c5ce7;
+    color: #667eea;
   }
 
   input[type="checkbox"] {
@@ -113,15 +113,15 @@ export const SortLabel = styled.label`
     height: 18px;
     cursor: pointer;
     border-radius: 4px;
-    border: 2px solid #d1d5db;
+    border: 2px solid #e2e8f0;
     background-color: white;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     appearance: none;
     position: relative;
 
     &:checked {
-      background-color: #6c5ce7;
-      border-color: #6c5ce7;
+      background-color: #667eea;
+      border-color: #667eea;
     }
 
     &:checked::after {
@@ -136,14 +136,14 @@ export const SortLabel = styled.label`
     }
 
     &:hover {
-      border-color: #6c5ce7;
-      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     }
 
     &:focus {
       outline: none;
-      border-color: #6c5ce7;
-      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
   }
 `;
