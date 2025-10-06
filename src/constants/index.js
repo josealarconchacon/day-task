@@ -5,11 +5,6 @@ export const TIMEOUTS = {
   TRANSITION_DELAY: 100,
 };
 
-export const STORAGE_KEYS = {
-  TASKS: "dayTask_tasks",
-  PREFERENCES: "dayTask_preferences",
-  SETTINGS: "dayTask_settings",
-};
 
 export const LIMITS = {
   MAX_TASK_LENGTH: 500,
@@ -18,14 +13,13 @@ export const LIMITS = {
 };
 
 export const ERROR_MESSAGES = {
-  STORAGE_UNAVAILABLE:
-    "Unable to save tasks. Please check your browser settings.",
+  NETWORK_ERROR: "Network connection error. Please check your internet connection.",
   TASK_TOO_LONG:
     "Task description is too long. Please keep it under 500 characters.",
   INVALID_TASK: "Please enter a valid task description.",
-  SAVE_FAILED: "Failed to save tasks. Changes may be lost.",
+  SAVE_FAILED: "Failed to save tasks. Please try again.",
   LOAD_FAILED: "Failed to load tasks. Please refresh the page.",
-  QUOTA_EXCEEDED: "Storage quota exceeded. Consider cleaning up old data.",
+  DATABASE_ERROR: "Database connection error. Please try again later.",
 };
 
 export const UI_STATES = {

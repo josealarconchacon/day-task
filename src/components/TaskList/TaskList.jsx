@@ -84,7 +84,7 @@ const TaskList = () => {
     setShowAdvancedFilters((prev) => !prev);
   }, []);
 
-  // show loading state while tasks are being loaded from localStorage
+  // show loading state while tasks are being loaded from Supabase
   if (isLoading) {
     return (
       <EmptyState>
