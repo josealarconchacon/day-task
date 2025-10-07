@@ -1,4 +1,3 @@
-import React from "react";
 import { getCategoryOptions } from "../../utils/categoryUtils.js";
 import { CategorySelectorStyled, CategoryOption } from "./StyledCategory.jsx";
 

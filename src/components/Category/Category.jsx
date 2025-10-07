@@ -1,4 +1,3 @@
-import React from "react";
 import { getCategoryConfig } from "../../utils/categoryUtils.js";
 import {
   CategoryBadge,
