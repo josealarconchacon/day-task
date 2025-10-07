@@ -48,33 +48,31 @@ export const NotesLabel = styled.span`
 export const NotesTextarea = styled.textarea`
   width: 100%;
   padding: ${(props) => (props.$minimal ? "8px 12px" : "12px")};
-  border: 1px solid #e1e5e9;
-  border-radius: ${(props) => (props.$minimal ? "6px" : "8px")};
+  border: ${(props) => (props.$minimal ? "none" : "1px solid #e1e5e9")};
+  border-radius: ${(props) => (props.$minimal ? "0" : "8px")};
   font-size: ${(props) => (props.$minimal ? "13px" : "14px")};
   font-family: inherit;
   line-height: 1.4;
   resize: ${(props) => (props.$minimal ? "none" : "vertical")};
   min-height: ${(props) => (props.$minimal ? "32px" : "60px")};
   max-height: ${(props) => (props.$minimal ? "32px" : "120px")};
-  background: ${(props) => (props.$minimal ? "#f8f9fa" : "#fafbfc")};
+  background: ${(props) => (props.$minimal ? "transparent" : "#fafbfc")};
   color: #2d3436;
   transition: all 0.2s ease;
-  opacity: ${(props) => (props.$minimal ? "0.8" : "1")};
+  opacity: ${(props) => (props.$minimal ? "1" : "1")};
 
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
-    background: white;
+    border-color: ${(props) => (props.$minimal ? "transparent" : "#6c5ce7")};
+    background: ${(props) => (props.$minimal ? "transparent" : "white")};
     box-shadow: ${(props) =>
-      props.$minimal
-        ? "0 0 0 2px rgba(108, 92, 231, 0.1)"
-        : "0 0 0 3px rgba(108, 92, 231, 0.1)"};
+      props.$minimal ? "none" : "0 0 0 3px rgba(108, 92, 231, 0.1)"};
     opacity: 1;
   }
 
   &:hover {
     opacity: ${(props) => (props.$minimal ? "1" : "1")};
-    background: ${(props) => (props.$minimal ? "white" : "#fafbfc")};
+    background: ${(props) => (props.$minimal ? "transparent" : "#fafbfc")};
   }
 
   &::placeholder {

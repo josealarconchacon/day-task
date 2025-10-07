@@ -16,6 +16,7 @@ const TaskNotes = ({
   isEditing = false,
   placeholder = "Add detailed notes or description...",
   variant = "default",
+  showToggle = true,
 }) => {
   const [isExpanded, setIsExpanded] = useState(isEditing);
   const [localNotes, setLocalNotes] = useState(notes);
@@ -70,7 +71,7 @@ const TaskNotes = ({
             value={localNotes}
             onChange={(e) => {
               setLocalNotes(e.target.value);
-              // In minimal mode, immediately update parent state
+              // immediately update parent state
               if (onNotesChange) {
                 onNotesChange(e.target.value);
               }
@@ -113,18 +114,20 @@ const TaskNotes = ({
 
   return (
     <NotesContainer>
-      <NotesToggle
-        onClick={handleToggle}
-        $hasNotes={hasNotes}
-        $compact={variant === "compact"}
-      >
-        <NotesIcon $hasNotes={hasNotes} $compact={variant === "compact"}>
-          📝
-        </NotesIcon>
-        <NotesLabel $hasNotes={hasNotes} $compact={variant === "compact"}>
-          {hasNotes ? "View Notes" : "Add Notes"}
-        </NotesLabel>
-      </NotesToggle>
+      {showToggle && (
+        <NotesToggle
+          onClick={handleToggle}
+          $hasNotes={hasNotes}
+          $compact={variant === "compact"}
+        >
+          <NotesIcon $hasNotes={hasNotes} $compact={variant === "compact"}>
+            📝
+          </NotesIcon>
+          <NotesLabel $hasNotes={hasNotes} $compact={variant === "compact"}>
+            {hasNotes ? "View Notes" : "Add Notes"}
+          </NotesLabel>
+        </NotesToggle>
+      )}
 
       {isExpanded && (
         <NotesDisplay $compact={variant === "compact"}>

@@ -5,7 +5,15 @@ import { PrioritySelector } from "../Priority/index.jsx";
 import { CategorySelector } from "../Category/index.jsx";
 import TaskNotes from "../TaskNotes/TaskNotes.jsx";
 import { DEFAULT_VALUES } from "../../constants/index.js";
-import { Form, Input, FormRow, Label, FormSection } from "./StyledTaskForm.jsx";
+import {
+  Form,
+  Input,
+  FormRow,
+  Label,
+  FormSection,
+  InlineNotesContainer,
+  MobileNotesContainer,
+} from "./StyledTaskForm.jsx";
 
 const TaskForm = () => {
   const [taskText, setTaskText] = useState("");
@@ -73,13 +81,24 @@ const TaskForm = () => {
             Add
           </Button>
         </FormRow>
-        <TaskNotes
-          notes={notes}
-          onNotesChange={handleNotesChange}
-          isEditing={true}
-          placeholder="Add notes (optional)..."
-          variant="minimal"
-        />
+        <InlineNotesContainer>
+          <TaskNotes
+            notes={notes}
+            onNotesChange={handleNotesChange}
+            isEditing={true}
+            placeholder="Add notes (optional)..."
+            variant="minimal"
+          />
+        </InlineNotesContainer>
+        <MobileNotesContainer>
+          <TaskNotes
+            notes={notes}
+            onNotesChange={handleNotesChange}
+            isEditing={true}
+            placeholder="Add notes (optional)..."
+            variant="minimal"
+          />
+        </MobileNotesContainer>
       </FormSection>
     </Form>
   );

@@ -1,4 +1,10 @@
 import styled from "styled-components";
+import {
+  COLORS,
+  FONT_SIZES,
+  BORDER_RADIUS,
+  SPACING,
+} from "../../styles/designTokens.js";
 
 export const Form = styled.form`
   margin-bottom: 30px;
@@ -7,11 +13,33 @@ export const Form = styled.form`
 export const FormSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
+`;
+
+export const InlineNotesContainer = styled.div`
+  background: white;
+  border-radius: 0 0 ${BORDER_RADIUS.lg} ${BORDER_RADIUS.lg};
+  border: 1px solid #f0f0f0;
+  border-top: none;
+  padding: 8px 12px 12px 12px;
+  margin-top: -1px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const MobileNotesContainer = styled.div`
+  display: none;
+  margin-top: 12px;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
 `;
 
 export const NotesLabel = styled.label`
-  font-size: 14px;
+  font-size: ${FONT_SIZES.lg};
   font-weight: 500;
   color: #6c5ce7;
   margin-bottom: 4px;
@@ -22,22 +50,24 @@ export const FormRow = styled.div`
   align-items: center;
   gap: 12px;
   background: white;
-  border-radius: 12px;
+  border-radius: ${BORDER_RADIUS.lg} ${BORDER_RADIUS.lg} 0 0;
   padding: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
-  transition: border-color 0.2s ease;
-
-  &:focus-within {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-  }
+  border-bottom: none;
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
     padding: 12px;
+    border-radius: ${BORDER_RADIUS.lg};
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+    gap: 6px;
   }
 `;
 
@@ -65,7 +95,7 @@ export const Input = styled.input`
 export const Label = styled.label`
   display: block;
   margin-bottom: 5px;
-  font-size: 14px;
+  font-size: ${FONT_SIZES.lg};
   font-weight: 500;
   color: #333;
   visibility: hidden;
@@ -76,7 +106,7 @@ export const NotesTextarea = styled.textarea`
   padding: 12px;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: ${FONT_SIZES.lg};
   font-family: inherit;
   line-height: 1.4;
   resize: vertical;
