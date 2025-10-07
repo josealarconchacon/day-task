@@ -9,7 +9,6 @@ import {
   GlobalStyle,
   AppContainer,
   Header,
-  Title,
   MainContent,
 } from "./styles/GlobalStyles";
 
