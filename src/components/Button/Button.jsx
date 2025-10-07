@@ -1,4 +1,3 @@
-import React from "react";
 import { StyledButton } from "./StyledButton.jsx";
 
 const Button = ({ children, variant = "primary", size, ...props }) => {
