@@ -1,12 +1,9 @@
-import React, { useReducer, useEffect, useRef, useCallback } from "react";
+import React, { useReducer, useEffect, useRef, createContext } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { TaskContext } from "./TaskContext.js";
 import { TaskService } from "../services/taskService.js";
-import {
-  TIMEOUTS,
-  DEFAULT_VALUES,
-  ERROR_MESSAGES,
-} from "../constants/index.js";
+
+export const TaskContext = createContext();
+import { DEFAULT_VALUES, ERROR_MESSAGES } from "../constants/index.js";
 
 // task validation helper
 const validateTask = (task) => {
@@ -77,14 +74,14 @@ const taskReducer = (state, action) => {
       };
     }
     case "add_task_from_db": {
-      // Add task from real-time subscription
+      // add task from real-time subscription
       const task = action.payload;
       if (!validateTask(task)) {
         console.warn("Invalid task from database, skipping:", task);
         return state;
       }
 
-      // Check if task already exists to avoid duplicates
+      // check if task already exists to avoid duplicates
       const exists = state.tasks.some((t) => t.id === task.id);
       if (exists) return state;
 
@@ -94,7 +91,7 @@ const taskReducer = (state, action) => {
       };
     }
     case "update_task_from_db": {
-      // Update task from real-time subscription
+      // update task from real-time subscription
       const updatedTask = action.payload;
       return {
         ...state,
@@ -109,7 +106,7 @@ const taskReducer = (state, action) => {
         tasks: state.tasks.filter((task) => task.id !== action.payload),
       };
     case "delete_task_from_db": {
-      // Delete task from real-time subscription
+      // delete task from real-time subscription
       return {
         ...state,
         tasks: state.tasks.filter((task) => task.id !== action.payload),
@@ -155,7 +152,7 @@ const initialState = {
   tasks: [],
 };
 
-// Supabase integration with real-time updates
+// supabase integration with real-time updates
 export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -163,7 +160,7 @@ export const TaskProvider = ({ children }) => {
   const isInitialized = useRef(false);
   const subscriptionRef = useRef(null);
 
-  // Load tasks from Supabase on mount
+  // load tasks from Supabase on mount
   useEffect(() => {
     const loadInitialTasks = async () => {
       try {
@@ -189,7 +186,7 @@ export const TaskProvider = ({ children }) => {
     loadInitialTasks();
   }, []);
 
-  // Set up real-time subscription
+  // set up real-time subscription
   useEffect(() => {
     if (isInitialized.current) {
       const subscription = TaskService.subscribeToTasks((payload) => {
@@ -226,7 +223,7 @@ export const TaskProvider = ({ children }) => {
     category = DEFAULT_VALUES.CATEGORY,
     notes = DEFAULT_VALUES.NOTES
   ) => {
-    // Optimistic update - add to UI immediately
+    // update to UI immediately
     const optimisticTask = {
       id: uuidv4(),
       text: text?.trim() || "",
@@ -242,17 +239,17 @@ export const TaskProvider = ({ children }) => {
       payload: optimisticTask,
     });
 
-    // Save to database
+    // save to database
     try {
       const { data, error } = await TaskService.addTask(optimisticTask);
       if (error) {
         console.error("Error saving task to database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-        // Remove the optimistic task on error
+        // remove the optimistic task on error
         dispatch({ type: "delete_task", payload: optimisticTask.id });
       } else {
         setSaveError(null);
-        // Update with the actual task from database (includes server-generated fields)
+        // update with the actual task from database (includes server-generated fields)
         dispatch({ type: "update_task_from_db", payload: data });
       }
     } catch (error) {
@@ -263,10 +260,10 @@ export const TaskProvider = ({ children }) => {
   };
 
   const deleteTask = async (id) => {
-    // Optimistic update - remove from UI immediately
+    // update - remove from UI immediately
     dispatch({ type: "delete_task", payload: id });
 
-    // Delete from database
+    // delete from database
     try {
       const { error } = await TaskService.deleteTask(id);
       if (error) {
@@ -281,29 +278,29 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error("Error deleting task:", error);
       setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-      // Reload tasks to restore the deleted task
+      // reload tasks to restore the deleted task
       const { data } = await TaskService.getTasks();
       dispatch({ type: "load_tasks", payload: data || [] });
     }
   };
 
   const toggleTask = async (id) => {
-    // Find the current task to get its completion status
+    // find the current task to get its completion status
     const currentTask = state.tasks.find((task) => task.id === id);
     if (!currentTask) return;
 
     const newCompleted = !currentTask.completed;
 
-    // Optimistic update - update UI immediately
+    //  update UI immediately
     dispatch({ type: "toggle_task", payload: id });
 
-    // Update in database
+    // update in database
     try {
       const { error } = await TaskService.toggleTask(id, newCompleted);
       if (error) {
         console.error("Error updating task in database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-        // Revert the optimistic update
+        // revert the optimistic update
         dispatch({ type: "toggle_task", payload: id });
       } else {
         setSaveError(null);
@@ -311,19 +308,19 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error("Error toggling task:", error);
       setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-      // Revert the optimistic update
+      // revert the update
       dispatch({ type: "toggle_task", payload: id });
     }
   };
 
   const editTask = async (id, newText, priority, category, notes) => {
-    // Optimistic update - update UI immediately
+    // update UI immediately
     dispatch({
       type: "edit_task",
       payload: { id, newText, priority, category, notes },
     });
 
-    // Update in database
+    // update in database
     try {
       const updates = {
         text: newText?.trim(),
@@ -336,7 +333,7 @@ export const TaskProvider = ({ children }) => {
       if (error) {
         console.error("Error updating task in database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-        // Reload tasks to restore the original state
+        // reload tasks to restore the original state
         const { data } = await TaskService.getTasks();
         dispatch({ type: "load_tasks", payload: data || [] });
       } else {
@@ -345,7 +342,7 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error("Error editing task:", error);
       setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-      // Reload tasks to restore the original state
+      // reload tasks to restore the original state
       const { data } = await TaskService.getTasks();
       dispatch({ type: "load_tasks", payload: data || [] });
     }
