@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useTasks } from "../../hooks/useTasks";
 import TaskItem from "../TaskItem/TaskItem.jsx";
-import FilterControls from "./FilterControls.jsx";
-import AdvancedFilters from "./AdvancedFilters.jsx";
+import Sidebar from "../Sidebar/Sidebar.jsx";
 import EmptyTaskState from "./EmptyTaskState.jsx";
 import SaveErrorNotification from "./SaveErrorNotification.jsx";
 import { sortTasksByPriority } from "../../utils/priorityUtils.js";
@@ -10,13 +9,13 @@ import { getCategoryOptions } from "../../utils/categoryUtils.js";
 import { TASK_FILTERS } from "../../constants/index.js";
 import { List, EmptyState } from "./StyledTaskList.jsx";
 
-const TaskList = () => {
+// Custom hook to manage task list state and logic
+export const useTaskListData = () => {
   const { tasks, isLoading, saveError } = useTasks();
   const [filter, setFilter] = useState(TASK_FILTERS.ALL);
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortByPriority, setSortByPriority] = useState(false);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // filtered and sorted tasks to prevent unnecessary recalculations
   const filteredTasks = useMemo(() => {
@@ -80,11 +79,53 @@ const TaskList = () => {
     setSortByPriority(checked);
   }, []);
 
-  const handleAdvancedFiltersToggle = useCallback(() => {
-    setShowAdvancedFilters((prev) => !prev);
-  }, []);
+  return {
+    tasks,
+    isLoading,
+    saveError,
+    filter,
+    priorityFilter,
+    categoryFilter,
+    sortByPriority,
+    filteredTasks,
+    taskCounts,
+    categoryOptions,
+    handleFilterChange,
+    handlePriorityFilterChange,
+    handleCategoryFilterChange,
+    handleSortToggle,
+  };
+};
 
-  // show loading state while tasks are being loaded from Supabase
+const TaskList = () => {
+  const taskListData = useTaskListData();
+
+  return (
+    <TaskListContent
+      tasks={taskListData.tasks}
+      isLoading={taskListData.isLoading}
+      saveError={taskListData.saveError}
+      filter={taskListData.filter}
+      priorityFilter={taskListData.priorityFilter}
+      categoryFilter={taskListData.categoryFilter}
+      filteredTasks={taskListData.filteredTasks}
+      handlePriorityFilterChange={taskListData.handlePriorityFilterChange}
+      handleCategoryFilterChange={taskListData.handleCategoryFilterChange}
+    />
+  );
+};
+
+export const TaskListContent = ({
+  tasks,
+  isLoading,
+  saveError,
+  filter,
+  priorityFilter,
+  categoryFilter,
+  filteredTasks,
+  handlePriorityFilterChange,
+  handleCategoryFilterChange,
+}) => {
   if (isLoading) {
     return (
       <EmptyState>
@@ -106,28 +147,6 @@ const TaskList = () => {
   return (
     <div>
       <SaveErrorNotification saveError={saveError} />
-
-      <FilterControls
-        filter={filter}
-        taskCounts={taskCounts}
-        showAdvancedFilters={showAdvancedFilters}
-        onFilterChange={handleFilterChange}
-        onAdvancedFiltersToggle={handleAdvancedFiltersToggle}
-      />
-
-      {showAdvancedFilters && (
-        <AdvancedFilters
-          priorityFilter={priorityFilter}
-          categoryFilter={categoryFilter}
-          categoryOptions={categoryOptions}
-          taskCounts={taskCounts}
-          tasks={tasks}
-          sortByPriority={sortByPriority}
-          onPriorityFilterChange={handlePriorityFilterChange}
-          onCategoryFilterChange={handleCategoryFilterChange}
-          onSortToggle={handleSortToggle}
-        />
-      )}
 
       <List>
         {filteredTasks.map((task) => (

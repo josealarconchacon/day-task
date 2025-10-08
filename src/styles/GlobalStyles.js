@@ -46,9 +46,13 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 export const AppContainer = styled.div`
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+
+  @media (max-width: 1024px) {
+    max-width: 800px;
+  }
 
   @media (max-width: 768px) {
     padding: 16px;
@@ -60,9 +64,34 @@ export const AppContainer = styled.div`
   }
 `;
 
+export const AppLayout = styled.div`
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    gap: 0;
+  }
+`;
+
+export const ContentArea = styled.div`
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
 export const Header = styled.header`
+  position: sticky;
+  top: 0;
+  z-index: 100;
   margin-bottom: 32px;
   padding: 0;
+  background: transparent;
+  backdrop-filter: blur(10px);
 
   @media (max-width: 768px) {
     margin-bottom: 24px;
