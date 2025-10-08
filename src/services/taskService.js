@@ -2,8 +2,21 @@ import { supabase, TASKS_TABLE } from "../lib/supabase.js";
 
 // service for all database operations
 export class TaskService {
+  // check if Supabase is available
+  static isSupabaseAvailable() {
+    if (!supabase) {
+      console.warn("Supabase is not configured. App will run in offline mode.");
+      return false;
+    }
+    return true;
+  }
+
   // get all tasks
   static async getTasks() {
+    if (!this.isSupabaseAvailable()) {
+      return { data: [], error: null };
+    }
+
     try {
       const { data, error } = await supabase
         .from(TASKS_TABLE)
@@ -20,6 +33,10 @@ export class TaskService {
 
   // add a new task
   static async addTask(taskData) {
+    if (!this.isSupabaseAvailable()) {
+      return { data: null, error: new Error("Supabase not configured") };
+    }
+
     try {
       const { data, error } = await supabase
         .from(TASKS_TABLE)
@@ -37,6 +54,10 @@ export class TaskService {
 
   // update a task
   static async updateTask(id, updates) {
+    if (!this.isSupabaseAvailable()) {
+      return { data: null, error: new Error("Supabase not configured") };
+    }
+
     try {
       const { data, error } = await supabase
         .from(TASKS_TABLE)
@@ -58,6 +79,10 @@ export class TaskService {
 
   // delete a task
   static async deleteTask(id) {
+    if (!this.isSupabaseAvailable()) {
+      return { data: null, error: new Error("Supabase not configured") };
+    }
+
     try {
       const { error } = await supabase.from(TASKS_TABLE).delete().eq("id", id);
 
@@ -76,6 +101,10 @@ export class TaskService {
 
   // subscribe to real-time changes
   static subscribeToTasks(callback) {
+    if (!this.isSupabaseAvailable()) {
+      return null;
+    }
+
     return supabase
       .channel("tasks_changes")
       .on(
@@ -92,7 +121,7 @@ export class TaskService {
 
   // unsubscribe from real-time changes
   static unsubscribe(subscription) {
-    if (subscription) {
+    if (subscription && supabase) {
       supabase.removeChannel(subscription);
     }
   }
