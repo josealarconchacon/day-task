@@ -1,6 +1,6 @@
-import React from "react";
 import Button from "../Button/Button.jsx";
 import { TaskActions as StyledTaskActions } from "./StyledTaskItem.jsx";
+import { COLORS, FONT_SIZES, FONT_WEIGHTS } from "../../styles/designTokens.js";
 
 const TaskActions = ({
   isEditing,
@@ -11,7 +11,7 @@ const TaskActions = ({
   onDelete,
 }) => {
   return (
-    <StyledTaskActions>
+    <StyledTaskActions className="task-actions">
       {isEditing ? (
         <>
           <Button variant="primary" size="small" onClick={onSave}>
@@ -22,19 +22,40 @@ const TaskActions = ({
           </Button>
         </>
       ) : (
-        <>
-          <Button
-            variant="secondary"
-            size="small"
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              color: COLORS.textSecondary,
+              fontSize: FONT_SIZES.md,
+              cursor: isCompleted ? "not-allowed" : "pointer",
+              padding: "4px 0",
+              textDecoration: "underline",
+              fontWeight: FONT_WEIGHTS.medium,
+              opacity: isCompleted ? 0.5 : 1,
+            }}
             onClick={onEdit}
             disabled={isCompleted}
           >
             Edit
-          </Button>
-          <Button variant="danger" size="small" onClick={onDelete}>
+          </button>
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              color: COLORS.error,
+              fontSize: FONT_SIZES.md,
+              cursor: "pointer",
+              padding: "4px 0",
+              textDecoration: "underline",
+              fontWeight: FONT_WEIGHTS.medium,
+            }}
+            onClick={onDelete}
+          >
             Delete
-          </Button>
-        </>
+          </button>
+        </div>
       )}
     </StyledTaskActions>
   );

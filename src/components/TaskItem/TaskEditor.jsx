@@ -1,4 +1,3 @@
-import React from "react";
 import { PrioritySelector } from "../Priority/index.jsx";
 import { CategorySelector } from "../Category/index.jsx";
 import { EditSection, EditInputRow, EditInput } from "./StyledTaskItem.jsx";
@@ -19,7 +18,7 @@ const TaskEditor = ({
           value={editText}
           onChange={onTextChange}
           onKeyDown={onKeyDown}
-          placeholder="Task text..."
+          placeholder="Enter task..."
           autoFocus
         />
       </EditInputRow>

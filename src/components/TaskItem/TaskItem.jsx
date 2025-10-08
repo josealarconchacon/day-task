@@ -27,6 +27,7 @@ const TaskItem = ({ task }) => {
     task.notes || DEFAULT_VALUES.NOTES
   );
   const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleTask, deleteTask, editTask } = useTasks();
 
@@ -96,6 +97,10 @@ const TaskItem = ({ task }) => {
     setIsEditingNotes(true);
   }, []);
 
+  const handleToggleNotes = useCallback(() => {
+    setShowNotes(!showNotes);
+  }, [showNotes]);
+
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
   }, []);
@@ -103,7 +108,6 @@ const TaskItem = ({ task }) => {
   const handleCloseDeleteModal = useCallback(() => {
     setShowDeleteModal(false);
   }, []);
-
 
   const handleTextChange = useCallback((e) => {
     setEditText(e.target.value);
@@ -123,7 +127,10 @@ const TaskItem = ({ task }) => {
 
   return (
     <>
-      <TaskContainer $priority={task.priority || DEFAULT_VALUES.PRIORITY}>
+      <TaskContainer
+        $priority={task.priority || DEFAULT_VALUES.PRIORITY}
+        className="task-item"
+      >
         <TaskHeader>
           <Checkbox
             type="checkbox"
@@ -153,13 +160,14 @@ const TaskItem = ({ task }) => {
           editNotes={editNotes}
           isEditing={isEditing}
           isEditingNotes={isEditingNotes}
+          showNotes={showNotes}
           onNotesChange={handleNotesChange}
           onStartEditingNotes={handleStartEditingNotes}
+          onToggleNotes={handleToggleNotes}
           onSaveNotes={handleNotesEdit}
           onCancelNotesEdit={handleCancelNotesEdit}
         />
 
-        {}
         <TaskActions
           isEditing={isEditing}
           isCompleted={task.completed}

@@ -3,63 +3,59 @@ import styled from "styled-components";
 export const TaskContainer = styled.li`
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
   margin-bottom: 12px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border: 1px solid #f1f3f4;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #e8eaed;
-    transform: translateY(-1px);
-  }
-
-  &:focus-within {
-    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
-    border-color: #6c5ce7;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-
-    &:hover {
-      transform: none;
-    }
-  }
+  border: 1px solid #e8eaed;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 
   @media (max-width: 768px) {
-    padding: 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
     margin-bottom: 8px;
+    border-radius: 8px;
   }
 `;
 
 export const TaskHeader = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  padding: 20px 24px 16px 24px;
+  min-height: 60px;
+
+  @media (max-width: 768px) {
+    padding: 16px 20px 12px 20px;
+    gap: 12px;
+    min-height: auto;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 16px 8px 16px;
+    gap: 10px;
+  }
 `;
 
 export const Checkbox = styled.input`
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  border-radius: 6px;
-  border: 2px solid #d1d5db;
-  background-color: white;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+  border: 2px solid #dadce0;
+  background-color: #ffffff;
   position: relative;
   appearance: none;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
 
   &:checked {
-    background-color: #6c5ce7;
-    border-color: #6c5ce7;
+    background-color: #1a73e8;
+    border-color: #1a73e8;
   }
 
   &:checked::after {
@@ -69,19 +65,15 @@ export const Checkbox = styled.input`
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 12px;
-    font-weight: bold;
-  }
-
-  &:hover {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
   }
 
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
   }
 
   @media (prefers-contrast: high) {
@@ -93,7 +85,8 @@ export const TaskDetails = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
 `;
 
 export const TaskContent = styled.div`
@@ -103,42 +96,51 @@ export const TaskContent = styled.div`
   width: 100%;
 `;
 
-export const TaskMainContent = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex: 1;
-`;
-
 export const EditNotesSection = styled.div`
-  margin-top: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
+  padding: 16px 24px 8px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #f1f3f4;
+  margin: 0 -1px -1px -1px;
+  border-radius: 0 0 12px 12px;
+
+  @media (max-width: 768px) {
+    padding: 12px 20px 6px 20px;
+    border-radius: 0 0 10px 10px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 16px 6px 16px;
+    border-radius: 0 0 8px 8px;
+  }
 `;
 
 export const TaskText = styled.span`
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   text-decoration: ${(props) => (props.$completed ? "line-through" : "none")};
-  color: ${(props) => (props.$completed ? "#9aa0a6" : "#202124")};
-  font-size: 16px;
+  color: ${(props) => (props.$completed ? "#9aa0a6" : "#3c4043")};
+  font-size: 15px;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.6;
   word-break: break-word;
-  margin-right: 8px;
-  min-width: 0; /* Allow text to shrink */
+  min-width: 0;
+  letter-spacing: -0.01em;
+  gap: 12px;
 
   @media (max-width: 768px) {
-    font-size: 15px;
-    margin-right: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 1.5;
   }
 
   @media (max-width: 480px) {
-    font-size: 14px;
-    margin-right: 4px;
-    line-height: 1.3;
+    font-size: 13px;
+    line-height: 1.4;
+    gap: 6px;
   }
 `;
 
@@ -164,66 +166,62 @@ export const EditInputRow = styled.div`
 export const TaskMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   width: 100%;
+  margin-top: 4px;
 
   @media (max-width: 768px) {
-    gap: 8px;
+    gap: 6px;
   }
 
   @media (max-width: 480px) {
-    gap: 6px;
+    gap: 4px;
     align-items: flex-start;
   }
 `;
 
 export const TaskActions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(248, 249, 250, 0.5);
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-  border-radius: 0 0 12px 12px;
+  justify-content: flex-end;
+  padding: 8px 20px 8px 20px;
+  background: transparent;
+  border-top: none;
+  margin: 0;
+  border-radius: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
-    gap: 8px;
-    margin-left: -12px;
-    margin-right: -12px;
-    padding-left: 12px;
-    padding-right: 12px;
+    gap: 6px;
+    padding: 6px 16px 6px 16px;
+    justify-content: flex-start;
+    /* Always show on mobile for better UX */
+    opacity: 1;
   }
 `;
 
 export const EditInput = styled.input`
   flex: 1;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border: 1px solid #dadce0;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 4px;
+  font-size: 14px;
   min-width: 0;
   background: white;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.5;
 
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
-  }
-
-  &:hover:not(:focus) {
-    border-color: #5f6368;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.1);
   }
 
   @media (max-width: 768px) {
-    padding: 10px 14px;
-    font-size: 16px;
+    padding: 8px 12px;
+    font-size: 14px;
   }
 `;
