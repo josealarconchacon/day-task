@@ -2,10 +2,18 @@ import { supabase, TASKS_TABLE } from "../lib/supabase.js";
 
 // service for all database operations
 export class TaskService {
+  static _offlineWarningShown = false;
+
   // check if Supabase is available
   static isSupabaseAvailable() {
     if (!supabase) {
-      console.warn("Supabase is not configured. App will run in offline mode.");
+      // Only show warning once to avoid console spam
+      if (!this._offlineWarningShown) {
+        console.warn(
+          "📱 Running in offline mode - tasks will not be saved to database"
+        );
+        this._offlineWarningShown = true;
+      }
       return false;
     }
     return true;

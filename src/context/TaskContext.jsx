@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, useRef, createContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TaskService } from "../services/taskService.js";
+import { DEFAULT_VALUES, ERROR_MESSAGES } from "../constants/index.js";
 
 export const TaskContext = createContext();
 
@@ -155,7 +156,6 @@ export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
   const [isLoading, setIsLoading] = React.useState(true);
   const [saveError, setSaveError] = React.useState(null);
-  const isInitialized = useRef(false);
   const subscriptionRef = useRef(null);
 
   // load tasks from Supabase on mount
@@ -177,43 +177,38 @@ export const TaskProvider = ({ children }) => {
         dispatch({ type: "load_tasks", payload: [] });
       } finally {
         setIsLoading(false);
-        isInitialized.current = true;
       }
     };
 
     loadInitialTasks();
+
+    // set up real-time subscription after initial load
+    const subscription = TaskService.subscribeToTasks((payload) => {
+      console.log("Real-time update received:", payload);
+
+      switch (payload.eventType) {
+        case "INSERT":
+          dispatch({ type: "add_task_from_db", payload: payload.new });
+          break;
+        case "UPDATE":
+          dispatch({ type: "update_task_from_db", payload: payload.new });
+          break;
+        case "DELETE":
+          dispatch({ type: "delete_task_from_db", payload: payload.old.id });
+          break;
+        default:
+          break;
+      }
+    });
+
+    subscriptionRef.current = subscription;
+
+    return () => {
+      if (subscriptionRef.current) {
+        TaskService.unsubscribe(subscriptionRef.current);
+      }
+    };
   }, []);
-
-  // set up real-time subscription
-  useEffect(() => {
-    if (isInitialized.current) {
-      const subscription = TaskService.subscribeToTasks((payload) => {
-        console.log("Real-time update received:", payload);
-
-        switch (payload.eventType) {
-          case "INSERT":
-            dispatch({ type: "add_task_from_db", payload: payload.new });
-            break;
-          case "UPDATE":
-            dispatch({ type: "update_task_from_db", payload: payload.new });
-            break;
-          case "DELETE":
-            dispatch({ type: "delete_task_from_db", payload: payload.old.id });
-            break;
-          default:
-            break;
-        }
-      });
-
-      subscriptionRef.current = subscription;
-
-      return () => {
-        if (subscriptionRef.current) {
-          TaskService.unsubscribe(subscriptionRef.current);
-        }
-      };
-    }
-  }, [isInitialized.current]);
 
   const addTask = async (
     text,
@@ -241,10 +236,16 @@ export const TaskProvider = ({ children }) => {
     try {
       const { data, error } = await TaskService.addTask(optimisticTask);
       if (error) {
-        console.error("Error saving task to database:", error);
-        setSaveError(ERROR_MESSAGES.SAVE_FAILED);
-        // remove the optimistic task on error
-        dispatch({ type: "delete_task", payload: optimisticTask.id });
+        // Only show error if it's not an offline mode error
+        if (error.message !== "Supabase not configured") {
+          console.error("Error saving task to database:", error);
+          setSaveError(ERROR_MESSAGES.SAVE_FAILED);
+          // remove the optimistic task on error
+          dispatch({ type: "delete_task", payload: optimisticTask.id });
+        } else {
+          // In offline mode, keep the optimistic task
+          setSaveError(null);
+        }
       } else {
         setSaveError(null);
         // update with the actual task from database (includes server-generated fields)
@@ -264,7 +265,7 @@ export const TaskProvider = ({ children }) => {
     // delete from database
     try {
       const { error } = await TaskService.deleteTask(id);
-      if (error) {
+      if (error && error.message !== "Supabase not configured") {
         console.error("Error deleting task from database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
         // Reload tasks to restore the deleted task
@@ -295,7 +296,7 @@ export const TaskProvider = ({ children }) => {
     // update in database
     try {
       const { error } = await TaskService.toggleTask(id, newCompleted);
-      if (error) {
+      if (error && error.message !== "Supabase not configured") {
         console.error("Error updating task in database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
         // revert the optimistic update
@@ -328,7 +329,7 @@ export const TaskProvider = ({ children }) => {
       };
 
       const { error } = await TaskService.updateTask(id, updates);
-      if (error) {
+      if (error && error.message !== "Supabase not configured") {
         console.error("Error updating task in database:", error);
         setSaveError(ERROR_MESSAGES.SAVE_FAILED);
         // reload tasks to restore the original state

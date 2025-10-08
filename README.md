@@ -10,7 +10,8 @@ A simple daily task management application built with React. The application str
 - **Priority Levels**: Set task priorities (High, Medium, Low) with visual indicators
 - **Advanced Filtering**: Filter tasks by completion status, priority, and category
 - **Notes Support**: Add detailed notes to tasks
-- **Real-time synchronization** with Supabase database
+- **Real-time synchronization** with Supabase database (optional - see setup below)
 - **Optimistic updates** for instant UI feedback
-- **Offline-capable** with automatic sync when connection restored
+- **Offline mode** - works without database (tasks stored in memory)
+- **Online mode** - persistent storage with automatic sync when Supabase is configured
 - Responsive design for mobile and desktop
