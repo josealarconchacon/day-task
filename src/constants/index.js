@@ -5,7 +5,6 @@ export const TIMEOUTS = {
   TRANSITION_DELAY: 100,
 };
 
-
 export const LIMITS = {
   MAX_TASK_LENGTH: 500,
   MAX_NOTES_LENGTH: 1000,
@@ -13,7 +12,8 @@ export const LIMITS = {
 };
 
 export const ERROR_MESSAGES = {
-  NETWORK_ERROR: "Network connection error. Please check your internet connection.",
+  NETWORK_ERROR:
+    "Network connection error. Please check your internet connection.",
   TASK_TOO_LONG:
     "Task description is too long. Please keep it under 500 characters.",
   INVALID_TASK: "Please enter a valid task description.",
@@ -22,23 +22,10 @@ export const ERROR_MESSAGES = {
   DATABASE_ERROR: "Database connection error. Please try again later.",
 };
 
-export const UI_STATES = {
-  LOADING: "loading",
-  SUCCESS: "success",
-  ERROR: "error",
-  IDLE: "idle",
-};
-
 export const TASK_FILTERS = {
   ALL: "all",
   ACTIVE: "active",
   COMPLETED: "completed",
-};
-
-export const PRIORITY_LEVELS = {
-  HIGH: "high",
-  MEDIUM: "medium",
-  LOW: "low",
 };
 
 export const DEFAULT_VALUES = {
