@@ -24,23 +24,53 @@ export const GlobalStyle = createGlobalStyle`
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
       monospace;
   }
+
+  .task-item:hover .task-actions {
+    opacity: 1 !important;
+  }
+
+  .inline-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .task-item:hover .inline-actions {
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .inline-actions {
+      opacity: 1;
+    }
+  }
 `;
 
 export const AppContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `;
 
 export const Header = styled.header`
   margin-bottom: 32px;
   padding: 0;
-`;
 
-export const Title = styled.h1`
-  color: #6c5ce7;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 20px;
+  }
 `;
 
 export const MainContent = styled.div`

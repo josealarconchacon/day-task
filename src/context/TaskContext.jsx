@@ -3,12 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 import { TaskService } from "../services/taskService.js";
 
 export const TaskContext = createContext();
-import { DEFAULT_VALUES, ERROR_MESSAGES } from "../constants/index.js";
 
 // task validation helper
 const validateTask = (task) => {
   if (!task || typeof task !== "object") return false;
-
   const validPriorities = ["high", "medium", "low"];
   const validCategories = [
     "personal",

@@ -69,20 +69,3 @@ export const getCategoryOptions = () => {
     icon: config.icon,
   }));
 };
-
-export const sortTasksByCategory = (tasks) => {
-  const categoryOrder = Object.keys(CATEGORIES);
-  return [...tasks].sort((a, b) => {
-    const categoryA = a.category || "personal";
-    const categoryB = b.category || "personal";
-    return categoryOrder.indexOf(categoryA) - categoryOrder.indexOf(categoryB);
-  });
-};
-
-export const getTaskCountByCategory = (tasks) => {
-  return tasks.reduce((counts, task) => {
-    const category = task.category || "personal";
-    counts[category] = (counts[category] || 0) + 1;
-    return counts;
-  }, {});
-};

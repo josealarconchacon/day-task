@@ -62,19 +62,3 @@ export const sortTasksByPriority = (tasks) => {
 export const getPriorityConfig = (priority) => {
   return PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.medium;
 };
-
-// filter tasks by  priority
-export const filterTasksByPriority = (tasks, priority) => {
-  return tasks.filter((task) => (task.priority || "medium") === priority);
-};
-
-export const getTaskCountByPriority = (tasks) => {
-  return tasks.reduce(
-    (counts, task) => {
-      const priority = task.priority || "medium";
-      counts[priority] = (counts[priority] || 0) + 1;
-      return counts;
-    },
-    { high: 0, medium: 0, low: 0 }
-  );
-};
