@@ -7,7 +7,6 @@ export class TaskService {
   // check if Supabase is available
   static isSupabaseAvailable() {
     if (!supabase) {
-      // Only show warning once to avoid console spam
       if (!this._offlineWarningShown) {
         console.warn(
           "📱 Running in offline mode - tasks will not be saved to database"
@@ -19,17 +18,23 @@ export class TaskService {
     return true;
   }
 
-  // get all tasks
-  static async getTasks() {
+  // get all tasks for the current user
+  static async getTasks(userId = null) {
     if (!this.isSupabaseAvailable()) {
       return { data: [], error: null };
     }
 
     try {
-      const { data, error } = await supabase
-        .from(TASKS_TABLE)
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from(TASKS_TABLE).select("*");
+
+      // Filter by user_id if authenticated
+      if (userId) {
+        query = query.eq("user_id", userId);
+      }
+
+      const { data, error } = await query.order("created_at", {
+        ascending: false,
+      });
 
       if (error) throw error;
       return { data, error: null };
@@ -40,15 +45,21 @@ export class TaskService {
   }
 
   // add a new task
-  static async addTask(taskData) {
+  static async addTask(taskData, userId = null) {
     if (!this.isSupabaseAvailable()) {
       return { data: null, error: new Error("Supabase not configured") };
     }
 
     try {
+      // add user_id in task data if authenticated
+      const taskWithUser = {
+        ...taskData,
+        ...(userId && { user_id: userId }),
+      };
+
       const { data, error } = await supabase
         .from(TASKS_TABLE)
-        .insert([taskData])
+        .insert([taskWithUser])
         .select()
         .single();
 
@@ -107,15 +118,57 @@ export class TaskService {
     return this.updateTask(id, { completed });
   }
 
+  // migrate anonymous tasks to authenticated user
+  static async migrateAnonymousTasks(taskIds, userId) {
+    if (!this.isSupabaseAvailable() || !taskIds.length || !userId) {
+      return { success: false, error: new Error("Invalid parameters") };
+    }
+
+    try {
+      // Update all anonymous tasks to have the user's ID
+      const { data, error } = await supabase
+        .from(TASKS_TABLE)
+        .update({ user_id: userId })
+        .in("id", taskIds)
+        .is("user_id", null)
+        .select();
+
+      if (error) throw error;
+
+      console.log(
+        `Migrated ${data?.length || 0} anonymous tasks to user ${userId}`
+      );
+
+      return { success: true, migratedCount: data?.length || 0, error: null };
+    } catch (error) {
+      console.error("Error migrating anonymous tasks:", error);
+      return { success: false, migratedCount: 0, error };
+    }
+  }
+
   // subscribe to real-time changes
-  static subscribeToTasks(callback) {
+  static subscribeToTasks(callback, userId = null) {
     if (!this.isSupabaseAvailable()) {
       return null;
     }
 
-    return supabase
-      .channel("tasks_changes")
-      .on(
+    const channel = supabase.channel("tasks_changes");
+
+    // user is authenticated, filter by user_id
+    if (userId) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: TASKS_TABLE,
+          filter: `user_id=eq.${userId}`,
+        },
+        callback
+      );
+    } else {
+      // anonymous users, listen to all changes
+      channel.on(
         "postgres_changes",
         {
           event: "*",
@@ -123,8 +176,10 @@ export class TaskService {
           table: TASKS_TABLE,
         },
         callback
-      )
-      .subscribe();
+      );
+    }
+
+    return channel.subscribe();
   }
 
   // unsubscribe from real-time changes

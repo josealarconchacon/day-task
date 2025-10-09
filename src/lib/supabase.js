@@ -21,7 +21,7 @@ if (!hasValidUrl || !hasValidKey) {
   );
 }
 
-// only create client if we have valid environment variables
+// only create  if there is a valid env variables
 export const supabase =
   supabaseUrl &&
   supabaseAnonKey &&
@@ -31,7 +31,7 @@ export const supabase =
         auth: {
           autoRefreshToken: true,
           persistSession: true,
-          detectSessionInUrl: false,
+          detectSessionInUrl: true,
         },
         realtime: {
           params: {

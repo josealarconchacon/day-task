@@ -1,6 +1,14 @@
-import React, { useReducer, useEffect, useRef, createContext } from "react";
+import React, {
+  useReducer,
+  useEffect,
+  useRef,
+  createContext,
+  useState,
+  useCallback,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TaskService } from "../services/taskService.js";
+import { StorageService } from "../services/storageService.js";
 import { DEFAULT_VALUES, ERROR_MESSAGES } from "../constants/index.js";
 
 export const TaskContext = createContext();
@@ -152,17 +160,57 @@ const initialState = {
 };
 
 // supabase integration with real-time updates
-export const TaskProvider = ({ children }) => {
+export const TaskProvider = ({ children, user }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [saveError, setSaveError] = React.useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveError, setSaveError] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [anonymousTaskCount, setAnonymousTaskCount] = useState(0);
   const subscriptionRef = useRef(null);
+  const userId = user?.id || null;
 
-  // load tasks from Supabase on mount
+  // initialize anonymous task count and handle migration on mount
+  useEffect(() => {
+    const migrateTasksOnAuth = async () => {
+      if (!userId) {
+        // not authenticated - load anonymous task count
+        const count = StorageService.getAnonymousTaskCount();
+        setAnonymousTaskCount(count);
+      } else {
+        // user just authenticated - migrate anonymous tasks
+        const anonymousTaskIds = StorageService.getAnonymousTaskIds();
+
+        if (anonymousTaskIds.length > 0) {
+          console.log(
+            `🔄 Migrating ${anonymousTaskIds.length} anonymous tasks to authenticated user...`
+          );
+
+          const { success, migratedCount } =
+            await TaskService.migrateAnonymousTasks(anonymousTaskIds, userId);
+
+          if (success) {
+            console.log(`✅ Successfully migrated ${migratedCount} tasks!`);
+          }
+        }
+
+        // clear anonymous count and task IDs
+        StorageService.clearAnonymousTaskCount();
+        setAnonymousTaskCount(0);
+      }
+    };
+
+    migrateTasksOnAuth();
+  }, [userId]);
+
+  // load tasks from Supabase on mount and when user changes
   useEffect(() => {
     const loadInitialTasks = async () => {
       try {
-        const { data, error } = await TaskService.getTasks();
+        if (userId) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
+        const { data, error } = await TaskService.getTasks(userId);
         if (error) {
           console.error("Error loading tasks from Supabase:", error);
           setSaveError(ERROR_MESSAGES.LOAD_FAILED);
@@ -199,7 +247,7 @@ export const TaskProvider = ({ children }) => {
         default:
           break;
       }
-    });
+    }, userId);
 
     subscriptionRef.current = subscription;
 
@@ -208,6 +256,37 @@ export const TaskProvider = ({ children }) => {
         TaskService.unsubscribe(subscriptionRef.current);
       }
     };
+  }, [userId]);
+
+  // check if user can add more tasks For anonymous users, limit is 5 tasks
+  const canAddTask = useCallback(() => {
+    if (userId) {
+      // authenticated users have no limit
+      return true;
+    }
+
+    // anonymous users are limited to 5 tasks
+    return anonymousTaskCount < 5;
+  }, [userId, anonymousTaskCount]);
+
+  //  handle auth requirement
+  const handleAuthRequired = useCallback(() => {
+    setShowAuthModal(true);
+  }, []);
+
+  // auth modal manually (for sign in button)
+  const openAuthModal = useCallback(() => {
+    setShowAuthModal(true);
+  }, []);
+
+  // close auth modal
+  const closeAuthModal = useCallback(() => {
+    setShowAuthModal(false);
+  }, []);
+
+  // reload tasks for the authenticated user
+  const handleAuthSuccess = useCallback(async () => {
+    setShowAuthModal(false);
   }, []);
 
   const addTask = async (
@@ -216,6 +295,11 @@ export const TaskProvider = ({ children }) => {
     category = DEFAULT_VALUES.CATEGORY,
     notes = DEFAULT_VALUES.NOTES
   ) => {
+    if (!canAddTask()) {
+      handleAuthRequired();
+      return { success: false, requiresAuth: true };
+    }
+
     // update to UI immediately
     const optimisticTask = {
       id: uuidv4(),
@@ -232,9 +316,15 @@ export const TaskProvider = ({ children }) => {
       payload: optimisticTask,
     });
 
+    if (!userId) {
+      const newCount = StorageService.incrementAnonymousTaskCount();
+      setAnonymousTaskCount(newCount);
+      StorageService.addAnonymousTaskId(optimisticTask.id);
+    }
+
     // save to database
     try {
-      const { data, error } = await TaskService.addTask(optimisticTask);
+      const { data, error } = await TaskService.addTask(optimisticTask, userId);
       if (error) {
         // Only show error if it's not an offline mode error
         if (error.message !== "Supabase not configured") {
@@ -251,10 +341,12 @@ export const TaskProvider = ({ children }) => {
         // update with the actual task from database (includes server-generated fields)
         dispatch({ type: "update_task_from_db", payload: data });
       }
+      return { success: true, requiresAuth: false };
     } catch (error) {
       console.error("Error adding task:", error);
       setSaveError(ERROR_MESSAGES.SAVE_FAILED);
       dispatch({ type: "delete_task", payload: optimisticTask.id });
+      return { success: false, requiresAuth: false };
     }
   };
 
@@ -357,6 +449,14 @@ export const TaskProvider = ({ children }) => {
         editTask,
         isLoading,
         saveError,
+        canAddTask,
+        anonymousTaskCount,
+        showAuthModal,
+        handleAuthRequired,
+        openAuthModal,
+        closeAuthModal,
+        handleAuthSuccess,
+        isAuthenticated: !!userId,
       }}
     >
       {children}
