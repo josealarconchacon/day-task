@@ -13,6 +13,10 @@ import {
   FormSection,
   InlineNotesContainer,
   MobileNotesContainer,
+  DesktopFormRow,
+  MobileFormContainer,
+  MobileInputRow,
+  MobileControlsRow,
 } from "./StyledTaskForm.jsx";
 
 const TaskForm = () => {
@@ -55,7 +59,8 @@ const TaskForm = () => {
   return (
     <Form onSubmit={handleSubmit}>
       <FormSection>
-        <FormRow>
+        {/* Desktop Layout */}
+        <DesktopFormRow>
           <Input
             type="text"
             value={taskText}
@@ -80,7 +85,51 @@ const TaskForm = () => {
           <Button type="submit" disabled={!taskText.trim()}>
             Add
           </Button>
-        </FormRow>
+        </DesktopFormRow>
+
+        {/* Mobile Layout */}
+        <MobileFormContainer>
+          <MobileInputRow>
+            <Input
+              type="text"
+              value={taskText}
+              onChange={handleTaskTextChange}
+              placeholder="What needs to be done?"
+              aria-label="Task description"
+            />
+          </MobileInputRow>
+
+          <MobileNotesContainer>
+            <TaskNotes
+              notes={notes}
+              onNotesChange={handleNotesChange}
+              isEditing={true}
+              placeholder="Add notes (optional)..."
+              variant="minimal"
+            />
+          </MobileNotesContainer>
+
+          <MobileControlsRow>
+            <PrioritySelector
+              id="priority-select-mobile"
+              value={priority}
+              onChange={handlePriorityChange}
+              required={false}
+              aria-label="Task priority"
+            />
+            <CategorySelector
+              id="category-select-mobile"
+              value={category}
+              onChange={handleCategoryChange}
+              required={false}
+              aria-label="Task category"
+            />
+            <Button type="submit" disabled={!taskText.trim()}>
+              Add
+            </Button>
+          </MobileControlsRow>
+        </MobileFormContainer>
+
         <InlineNotesContainer>
           <TaskNotes
             notes={notes}
@@ -90,15 +139,6 @@ const TaskForm = () => {
             variant="minimal"
           />
         </InlineNotesContainer>
-        <MobileNotesContainer>
-          <TaskNotes
-            notes={notes}
-            onNotesChange={handleNotesChange}
-            isEditing={true}
-            placeholder="Add notes (optional)..."
-            variant="minimal"
-          />
-        </MobileNotesContainer>
       </FormSection>
     </Form>
   );

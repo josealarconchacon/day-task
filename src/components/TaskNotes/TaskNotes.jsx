@@ -71,7 +71,7 @@ const TaskNotes = ({
             value={localNotes}
             onChange={(e) => {
               setLocalNotes(e.target.value);
-              // immediately update parent state
+              // update parent state
               if (onNotesChange) {
                 onNotesChange(e.target.value);
               }
@@ -91,7 +91,7 @@ const TaskNotes = ({
           value={localNotes}
           onChange={(e) => {
             setLocalNotes(e.target.value);
-            // In editing mode, immediately update parent state
+            // in editing mode, update parent state
             if (onNotesChange) {
               onNotesChange(e.target.value);
             }

@@ -31,10 +31,16 @@ export const InlineNotesContainer = styled.div`
 
 export const MobileNotesContainer = styled.div`
   display: none;
-  margin-top: 12px;
 
   @media (max-width: 768px) {
     display: block;
+    background: white;
+    border-radius: 0;
+    border: 1px solid #f0f0f0;
+    border-top: none;
+    border-bottom: none;
+    padding: 8px 12px 12px 12px;
+    margin-top: -1px;
   }
 `;
 
@@ -68,6 +74,59 @@ export const FormRow = styled.div`
   @media (max-width: 480px) {
     padding: 10px;
     gap: 6px;
+  }
+`;
+
+export const DesktopFormRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: ${BORDER_RADIUS.lg} ${BORDER_RADIUS.lg} 0 0;
+  padding: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  border-bottom: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const MobileFormContainer = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+`;
+
+export const MobileInputRow = styled.div`
+  background: white;
+  border-radius: ${BORDER_RADIUS.lg} ${BORDER_RADIUS.lg} 0 0;
+  padding: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  border-bottom: none;
+`;
+
+export const MobileControlsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 0 0 ${BORDER_RADIUS.lg} ${BORDER_RADIUS.lg};
+  padding: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  border-top: none;
+  margin-top: -1px;
+
+  @media (max-width: 480px) {
+    gap: 12px;
+    padding: 6px;
   }
 `;
 

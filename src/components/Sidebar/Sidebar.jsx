@@ -16,6 +16,13 @@ import {
   SortDescription,
   ToggleButton,
   MenuIcon,
+  MobileHeader,
+  MobileHeaderBranding,
+  MobileBrandIcon,
+  MobileBrandText,
+  MobileBrandTitle,
+  MobileBrandSubtitle,
+  MobileHeaderSpacer,
 } from "./StyledSidebar.jsx";
 
 const Sidebar = ({
@@ -40,7 +47,7 @@ const Sidebar = ({
       const mobile = window.innerWidth <= 1024;
       setIsMobile(mobile);
       if (!mobile) {
-        setIsOpen(false); // Close mobile menu when switching to desktop
+        setIsOpen(false);
       }
     };
 
@@ -67,18 +74,31 @@ const Sidebar = ({
   return (
     <>
       {isMobile && (
-        <ToggleButton
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle sidebar menu"
-        >
-          <MenuIcon viewBox="0 0 24 24">
-            {isOpen ? (
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            ) : (
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-            )}
-          </MenuIcon>
-        </ToggleButton>
+        <>
+          <MobileHeader>
+            <ToggleButton
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle sidebar menu"
+              $isOpen={isOpen}
+            >
+              <MenuIcon viewBox="0 0 24 24">
+                {isOpen ? (
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                ) : (
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                )}
+              </MenuIcon>
+            </ToggleButton>
+            <MobileHeaderBranding>
+              <MobileBrandIcon />
+              <MobileBrandText>
+                <MobileBrandTitle>DayLily</MobileBrandTitle>
+                <MobileBrandSubtitle>Today's Tasks</MobileBrandSubtitle>
+              </MobileBrandText>
+            </MobileHeaderBranding>
+          </MobileHeader>
+          <MobileHeaderSpacer />
+        </>
       )}
 
       <SidebarOverlay $isOpen={isOpen} onClick={handleOverlayClick} />

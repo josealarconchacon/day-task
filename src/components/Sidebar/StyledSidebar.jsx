@@ -45,10 +45,10 @@ export const SidebarContainer = styled.aside`
   @media (max-width: 1024px) {
     position: fixed;
     left: ${(props) => (props.$isOpen ? "0" : "-100%")};
-    top: 0;
+    top: 64px; /* Start below mobile header */
     width: 320px;
-    height: 100vh;
-    max-height: 100vh;
+    height: calc(100vh - 64px); /* Adjust height to account for header */
+    max-height: calc(100vh - 64px);
     z-index: 1000;
     border-radius: 0;
     border-left: none;
@@ -57,6 +57,9 @@ export const SidebarContainer = styled.aside`
 
   @media (max-width: 768px) {
     width: 280px;
+    top: 56px; /* Smaller header height on mobile */
+    height: calc(100vh - 56px); /* Adjust height for smaller header */
+    max-height: calc(100vh - 56px);
   }
 `;
 
@@ -245,26 +248,55 @@ export const SortDescription = styled.div`
   line-height: 1.4;
 `;
 
-export const ToggleButton = styled.button`
+// Mobile header bar for toggle button
+export const MobileHeader = styled.header`
   display: none;
-  position: fixed;
-  bottom: ${SPACING.xxl};
-  right: ${SPACING.xxl};
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: ${COLORS.accentSecondary};
-  color: white;
-  border: none;
-  cursor: pointer;
-  box-shadow: ${SHADOWS.lg};
-  z-index: 1001;
-  transition: all ${TRANSITIONS.fast};
+
+  @media (max-width: 1024px) {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid ${COLORS.borderLight};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    z-index: 1001;
+    align-items: center;
+    padding: 0 ${SPACING.lg};
+    gap: ${SPACING.md};
+    transition: all ${TRANSITIONS.normal};
+  }
+
+  @media (max-width: 768px) {
+    height: 56px;
+    padding: 0 ${SPACING.md};
+  }
+`;
+
+export const ToggleButton = styled.button`
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: ${BORDER_RADIUS.md};
+  background: ${(props) =>
+    props.$isOpen ? COLORS.accentSecondary : "transparent"};
+  color: ${(props) => (props.$isOpen ? "white" : COLORS.textPrimary)};
+  border: 1px solid
+    ${(props) => (props.$isOpen ? COLORS.accentSecondary : COLORS.borderMedium)};
+  cursor: pointer;
+  transition: all ${TRANSITIONS.fast};
+  flex-shrink: 0;
 
   &:hover {
-    background: ${COLORS.accentPrimary};
+    background: ${(props) =>
+      props.$isOpen ? COLORS.accentPrimary : COLORS.backgroundSecondary};
+    border-color: ${(props) =>
+      props.$isOpen ? COLORS.accentPrimary : COLORS.borderDark};
     transform: scale(1.05);
   }
 
@@ -272,8 +304,9 @@ export const ToggleButton = styled.button`
     transform: scale(0.95);
   }
 
-  @media (max-width: 1024px) {
-    display: flex;
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -291,4 +324,95 @@ export const MenuIcon = styled.svg`
   width: 24px;
   height: 24px;
   fill: currentColor;
+  transition: transform ${TRANSITIONS.fast};
+
+  @media (max-width: 768px) {
+    width: 22px;
+    height: 22px;
+  }
+`;
+
+export const MobileHeaderBranding = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${SPACING.md};
+  flex: 1;
+`;
+
+export const MobileBrandIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: ${BORDER_RADIUS.md};
+  background: linear-gradient(
+    135deg,
+    ${COLORS.accentSecondary},
+    ${COLORS.accentPrimary}
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: ${SHADOWS.sm};
+
+  &::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    width: 28px;
+    height: 28px;
+
+    &::after {
+      width: 6px;
+      height: 6px;
+    }
+  }
+`;
+
+export const MobileBrandText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+export const MobileBrandTitle = styled.h1`
+  font-size: ${FONT_SIZES.xxl};
+  font-weight: ${FONT_WEIGHTS.semibold};
+  color: ${COLORS.textPrimary};
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: ${FONT_SIZES.xl};
+  }
+`;
+
+export const MobileBrandSubtitle = styled.p`
+  font-size: ${FONT_SIZES.xs};
+  color: ${COLORS.textMuted};
+  margin: 0;
+  line-height: 1;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const MobileHeaderSpacer = styled.div`
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: block;
+    height: 64px;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    height: 56px;
+  }
 `;

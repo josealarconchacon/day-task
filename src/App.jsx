@@ -85,7 +85,7 @@ const TaskListLayout = () => {
         />
       </ErrorBoundary>
       <ContentArea>
-        <Header>
+        <Header className="desktop-header">
           <div
             style={{
               background: "rgba(255, 255, 255, 0.8)",

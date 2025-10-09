@@ -93,12 +93,8 @@ export const Header = styled.header`
   background: transparent;
   backdrop-filter: blur(10px);
 
-  @media (max-width: 768px) {
-    margin-bottom: 24px;
-  }
-
-  @media (max-width: 480px) {
-    margin-bottom: 20px;
+  @media (max-width: 1024px) {
+    display: none; // Hide desktop header on mobile since we have mobile header bar
   }
 `;
 
